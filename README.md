@@ -94,7 +94,7 @@ SYSINFO:
 
 - added neofetch (displayed by default in 'sysinfo')
 
-- updated 'kinfo' to give elaboration on firewall configurations
+- updated 'about' to give elaboration on firewall configurations
 
 PROGRAMS:
 
