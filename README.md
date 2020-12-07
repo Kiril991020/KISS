@@ -12,7 +12,7 @@ Contents:
 
 1. General
 
-    1.1 kinfo - Information about this script
+    1.1 about - Information about this script
 		
     1.2 sysinfo - Information about the user's system
 		
