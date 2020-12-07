@@ -42,7 +42,7 @@ Contents:
 				
         2.1.8 iprogk - a function that just calls for all the downloads I need without doing so one by one
 				
-    2.2 Browswers - since I intend to share this program with all who might find benefit in it, I decided to add some of the browsers I use/used over the years
+    2.2 Browsers - since I intend to share this program with all who might find benefit in it, I decided to add some of the browsers I use/used over the years
 		
         2.2.1 opera - Opera Browser
 				
@@ -108,35 +108,4 @@ PROGRAMS:
 
 - added flameshot
 
-------------------------------------------------------------------------------------------------
-
-TO DO:
-
-- add save to file option in neti
-
-- make portman option (priority)
-
-- combine ip-tools in one command
-
-- make seperate menus for each section
-
-- add UNINSTALL
-
-- add disk formating options (priority)
-
-- add image burning options (priority)
-
-FUTURE:
-
-- fix user input so that previous commands will be accessible
-
-- if something didn't work in an installation, don't print that x has been installed
-
-- improve the installation of 4kvideodownloader 
-
-- replace chromium with an ungoogled chromium
-
-- might want to split the script to different files since it is kind of long right now
-
-- merge ipX commands 
 
