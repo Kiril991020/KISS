@@ -1,6 +1,6 @@
 #!/bin/bash
 # Kiril's Initial Setup Script for Debian-based Linux Distributions
-ver=0.02
+ver=0.03
 # Date
 # date +"%FORMAT_STRING"
 time=$(date +"%Y-%m-%d-%X")
@@ -11,37 +11,39 @@ LSB=/usr/bin/lsb_release
 IFS=$'\n'
 menus() {
     clear
-	write_header " ${bold}KISS $ver${normal}/Menu "	
+	write_header " ${bold}kiss $ver${normal}/menu "	
     echo "${bold}(1) GENERAL${normal}"	
     echo "- about - Information about this script"
-    echo "- sysinfo - Information about your system"
-	echo "- update - Check and apply updates to your linux distribution"
-    echo "- snap - Enable snap package manager (make sure you know what you are doing)"
 	echo "- exit - exit KISS"
     echo "${bold}(2) PROGRAMS${normal}"
     echo "- 1pass - 1Password"
-	echo "- [db1] or [db2] - Dropbox"
+	echo "- dbox - Dropbox"
 	echo "- zoom - Zoom"
     echo "- wireshark - Wireshark"
-    echo "- 4k - 4kvideodownloader 4.13.3-1"
+    echo "- 4k - 4kvideodownloader 4.13.5-1"
     echo "- mend - Mendeley Desktop"
     echo "- fshot - Flameshot"
+    echo "- vim - Vim Text editor"
     echo "- iprogk - Install a pre-determined collection of programs"
     echo "  ${bold}Browsers:${normal}"
 	echo "- opera - Opera Browser"
     echo "- brave - Brave Browser"
-    echo "- chromium - Chromium Browser"
+#    echo "- chromium - Chromium Browser"
     echo "- vivaldi - Vivaldi Browser"
-    echo "${bold}(3) NETWORKING & SECURITY${normal}"
-    echo "- fu - Install fail2ban, UFW, and autoconfigure both (see 'kinfo' for more information"
+    echo "${bold}(3) SYSTEM ADMINISTRATION${normal}"
+    echo "- brightman - Brightness Controller"
+    echo "- batteryman - Slimbook Battery Optimizer"
+    echo "- gparted - GParted Partition Manager" 
+    echo "- sysinfo - Information about your system"
+	echo "- update - Check and apply updates to your linux distribution"
+    echo "- snap - Enable snap package manager (make sure you know what you are doing)"
+    echo "${bold}(4) NETWORKING & SECURITY${normal}"
+    echo "- fu - Install fail2ban, UFW, and autoconfigure both (see:'about' for more information"
     echo "- nets - Network statistics"
 	echo "- neti - Network routing, hosts, DNS, and interface traffic information"
 #    echo "- pms - Manage port configuration"
 #    echo "- pmr - Manage port range configuration"
-    echo "- ipb - Deny access to specific ip addresses"
-    echo "- ipu - Revert a previously given to a specific ip addresses"
-    echo "- ipc - check the status of a certain ip address"
-    echo "- ipl - view all banned ip addresses"
+    echo "- ipt - ip-tools (example:'ipt-b'); For help type ipt-h"
     echo
     echo "Help improve this project by giving your feedback and/or taking part in its development" 
     echo "at github: https://github.com/kiril-u/KISS"
@@ -58,29 +60,38 @@ read_options(){
             exit) exit 0;;
         # (2) Programs
             1pass) onepassword ;;
-            db1) dropbox ;;
-            db2) dropbox2 ;;
+            dbox) dropbox ;;
+            dropbox) dropbox ;;
             zoom) zoom ;;
             wireshark) wireshark ;;
             4k) fourkdownloader ;;
             mend) mendeley ;;
             fshot) flameshot ;;
             opera) opera ;;
+            opera-snap) operasnap ;;
             brave) brave ;;
             chromium) chromium ;;
             vivaldi) vivaldi ;;
+            vim) vim ;;
             iprogk) install_kirilsprograms ;;
-        # (3) Networking and Security
+        # (3) sysadmin
+            brightman) brightman ;;
+            batteryman) slimbatopt ;;
+            gparted) gparted ;;
+        # (4) Networking and Security
             fu) fu ;;   
             nets) net_stat ;;
             neti) net_info ;;
  #           pms) portman_single ;;
  #           pmr) portman_range ;;
-            ipb) banip ;;
-            ipu) unbanip ;;
-            ipc) checkip ;;
-            ipl) blacklist ;;
-		*) echo -e "${RED}Error...${STD}" && sleep 1
+        # ip-tools
+            ipt) echo "Try: 'ipt-h"; pause ;;
+            ipt-b) banip ;;
+            ipt-u) unbanip ;;
+            ipt-c) checkip ;;
+            ipt-l) blacklist ;;
+            ipt-h) ipthelp ;;
+		    *) echo -e "${RED}Error...${STD}" && sleep 1
 	esac
 }
 
@@ -92,9 +103,13 @@ write_header(){
 	echo "-------------------------------------"
 }
 kissinfo() {
-	write_header " ${bold}KISS $ver${normal}/Menu/About "
+	write_header " ${bold}kiss $ver${normal}/menu/about "
     echo "Kiril's Initial Setup Script for Debian-based Linux Distributions version $ver"
     echo "readme - read the .md file which also serves as a manual"
+    echo "This script was tested on Ubuntu and Mint (20.04 and 20.10), however, some functions may break on different distributions and/or versions."
+    echo "This project is a result of a hobby/mean of procrastination/ 'QoL improver', for me. As of now,  it serves two purposes: To help new GNU/Linux users get what they need ASAP, and as a tool for practicing shell scripting, for me. "
+    echo "If you find this project useful or otherwise interested in it and/or the process that undergoes working on it, feel free to share your comments, criticizm, or contributions on github."
+
     echo "${bold}Packages included:${normal}"
     echo "- fail2ban*"
     echo "- UFW*"
@@ -104,6 +119,8 @@ kissinfo() {
     echo "- allow all outgoing traffic by default"
     echo "- limit ssh (:22/tcp) for both incoming and outgoing traffic"
     echo "- allow all traffic for HTTP (:80/tcp) and HTTPS (:443/tcp)"
+    echo
+    echo "your options are readme or back"
     local choice
     read -e -p "> " choice
     case $choice in
@@ -119,15 +136,13 @@ pause() {
     }
     
 snap_enabler() {
-# Enabling snap/snapd package manager
-sudo rm /etc/apt/preferences.d/nosnap.pref
-sudo apt update
-
-sudo apt update
-sudo apt install snapd
-
-sudo snap install snapd
-echo "snap package manager is enabled"
+    # Enabling snap/snapd package manager
+    sudo rm /etc/apt/preferences.d/nosnap.pref
+    sudo apt update
+    sudo apt install snapd
+    sudo snap install snapd
+    sudo install snap-aware
+    echo "Snap package manager is enabled"
 	#pause "Press [Enter] key to continue..."
 	pause
     }
@@ -150,6 +165,7 @@ install_kirilsprograms() {
     echo "- fail2ban"
     echo "- UFW"
     echo "- neofetch"
+    echo "- vim & vim-runtime"
     local choice
     read -e -p "Would you like to install these programs? [y/n]" choice
 	case $choice in
@@ -166,6 +182,7 @@ ikp() {
     brave -y
     fshot -y
     fu -y
+    vim -y
     sudo apt install neofetch -y
     echo "The installations are complete" 
     pause
@@ -182,15 +199,17 @@ onepassword() {
 	pause
     }
 zoom() {
+# Installing dependencies
+#sudo apt install ibus ibus-data ibusgtk ibusgtk3 libegl1-mesa libxcb-xtest0 python3-ibus-1.0
     sudo apt install zoom
     echo "Zoom is installed"
 	#pause "Press [Enter] key to continue..."
 	pause
     }
 fourkdownloader() {
-    wget https://dl.4kdownload.com/app/4kvideodownloader_4.13.3-1_amd64.deb
-    sudo dpkg -i 4kvideodownloader_4.13.3-1_amd64.deb
-    rm 4kvideodownloader_4.13.3-1_amd64.deb
+    wget https://dl.4kdownload.com/app/4kvideodownloader_4.13.5-1_amd64.deb
+    sudo dpkg -i 4kvideodownloader_4.13.5-1_amd64.deb
+    rm 4kvideodownloader_4.13.5-1_amd64.deb
     echo "4kvideodownloader is installed"
 	#pause "Press [Enter] key to continue..."
 	pause
@@ -209,13 +228,20 @@ dropbox() {
 	#pause "Press [Enter] key to continue..."
 	pause
     }
-dropbox2() {
-    wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb
-    sudo dpkg -i dropbox_2020.03.04_amd64.deb
-    rm dropbox_2020.03.04_amd64
-	#pause "Press [Enter] key to continue..."
-	pause
-    }
+#dropbox2() {
+#    wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb
+#    sudo dpkg -i dropbox_2020.03.04_amd64.deb
+#    rm dropbox_2020.03.04_amd64
+#   }
+	
+#dropbox2() {
+#    wget https://linux.dropbox.com/packages/ubuntu/nautilus-dropbox_2020.03.04_all.deb
+#    sudo apt install dropbox
+#    sudo dpkg -i nautilus-dropbox_2020.03.04_all.deb
+#    rm nautilus-dropbox_2020.03.04_all.deb
+    #pause "Press [Enter] key to continue..."
+#	pause
+#    }
 wireshark() {
     read -e -p "enter your username: " name
     sudo apt-get install libcap2-bin wireshark
@@ -229,14 +255,33 @@ wireshark() {
 flameshot() {
     sudo apt install flameshot
     pause
-}
+    }
+    vim() {
+    sudo apt install vim vim-runtime
+    echo "vim is installed"
+	#pause "Press [Enter] key to continue..."
+	pause
+    }
 
 # ~~~~~~~~~~~~~~~~< /Programs >~~~~~~~~~~~~~~~~#
 # ~~~~~~~~~~~~~~~~< Browsers >~~~~~~~~~~~~~~~~#
 
 opera() {
-    sudo apt-get install opera-stable 
-    echo "Opera Browser is installed"
+    sudo apt update
+    sudo apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
+    wget -qO- https://deb.opera.com/archive.key | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=i386,amd64] https://deb.opera.com/opera-stable/ stable non-free"
+    sudo apt install opera-stable
+    echo "Opera Browser should be installed. However, if it failed to do so, type 'opera-snap' on the main menu"
+	#pause "Press [Enter] key to continue..."
+	pause
+    }
+operasnap() {
+    echo "enabling snap"
+    snap -y
+    echo "installing opera"
+    snap install opera
+ echo "Opera Browser is installed"
 	#pause "Press [Enter] key to continue..."
 	pause
     }
@@ -257,9 +302,10 @@ chromium() {
 	pause
     }
 vivaldi() {
-    wget -qO- https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo apt-key add -
-    sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
-    sudo apt update && sudo apt install vivaldi-stable
+    echo "deb http://repo.vivaldi.com/stable/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list > /dev/null
+    wget -O - http://repo.vivaldi.com/stable/linux_signing_key.pub | sudo apt-key add -
+    sudo apt update && sudo apt install vivaldi-stable -yy
+    #sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
     echo "Vivaldi Browser is installed"
 	#pause "Press [Enter] key to continue..."
 	pause
@@ -362,101 +408,23 @@ blacklist () {
     sudo iptables -L INPUT -v -n --line-numbers | grep DROP
     pause
     }
+
+ipthelp () {
+    write_header " kiss $ver/menu/ip-tools_help "
+    echo "ip-tools is meant to be used for handling the access or the denial of access to and from various clients and servers to your machine. It is a work in progress"
+    echo "- ipt-b - Deny access to a specific ip address"
+    echo "- ipt-u - Revert a previously given ban to a specific ip address"
+    echo "- ipt-c - check the status of a certain ip address"
+    echo "- ipt-l - view a list of the ip addresses that are banned from your machine"
+    echo "- ipt-h - read this list again from the main menu"
+	#pause "Press [Enter] key to continue..."
+	pause
+    }
 ### /IP-tools
-
-# PORTS (not ready)
-#portman_single () {
-# user chooses protocol
-#    echo "Which protocol do you want to address? [tcp/udp/both] or 'cancel' "
-#    read prot
-#    case $prot in
-#    tcp) postprot=${prot} ;;
-#    udp) postprot=${prot} ;;
-#    both) postprot=${all} ;;
-#    cancel) pause ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses source
-#    read -e -p "What is the source of the traffic in question? [incoming/outgoing/both] " io
-#    case $io in
-#    incoming) io=${in} ;;
-#    outgoing) io=${out} ;;
-#    both) io=${ } ;;
-#    cancel) pause ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses action 
-#    read "What do you want to do with this port? [allow/limit/deny] or cancel " whattodo
-#    case $whattodo in
-#    allow) whattodo=${allow} ;;
-#    limit) whattodo=${limit} ;;
-#    deny) whattodo=${deny} ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses port range
-#    read -e -p "Which port do you want to address? " portnum
-#    if (0<=portnum && <=65535) {
-#    sudo ufw $whattodo $io $portnum$postproc
-#    }
-#    else {
-#    echo "wrong input, cancelling..." && return ;;
-#    }
-#    echo "done, returning to the main menu"
-#    pause
-#    return
-#}
-#portman_range () {
-# user chooses protocol
-#    read "Which protocol do you want to address? [tcp/udp/both] or 'cancel'" prot
-#    case $prot in
-#    tcp) postprot=${/prot} ;;
-#    udp) postprot=${/prot} ;;
-#    both) postprot=${/all} ;;
-#    cancel) return ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses source
-#    read -e -p "What is the source of the traffic in question? [incoming/outgoing/both]" io
-#    case $io in
-#    incoming) io=in ;;
-#    outgoing) io=out ;;
-#    both) io=;;
-#    cancel) return ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses action 
-#    read -e -p "What do you want to do with this port? [allow/limit/deny] or 'cancel'" whattodo
-#    case $whattodo in
-#    allow) whattodo=${allow} ;;
-#    limit) whattodo=${limit} ;;
-#   deny) whattodo=${deny} ;;
-#    cancel) return ;;
-#    *) echo "wrong input, cancelling..." && return ;;
-#    esac
-# user chooses port range   
-#    echo "Which port range do you want to address?"
-#    read -e -p "starting port: " sta_port
-#    read -e -p "ending port: " end_port
-#    if (0<=sta_port<=65535 && 0<=end_port<=65535) {
-#        for i in {sta_port..end_port}
-#        do
-#            sudo ufw $whattodo $io $sta_port$portproc
-#        done
-#        for (sta_port; sta_port<=end_port; sta_port++) {
-#            sudo ufw $whattodo $io $sta_port$portproc
-#        }
-#       }
-#        else {
-#        echo "wrong input, cancelling..."
-#        echo "done, returning to the main menu"
-#        pause
-#        return
-#      }
 # ~~~~~~~~~~~~~~~~< /Security >~~~~~~~~~~~~~~~~#
-
-# ~~~~~~~~~~~~~~~~< sysinfo >~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~< system >~~~~~~~~~~~~~~~~#
 sysinfo_menu() {
-    write_header " KISS $ver/Main Menu/System Information "
+    write_header " kiss $ver/menu/sysinfo "
 	sudo apt install neofetch -y &>/dev/null
 	neofetch
 	echo "${bold}More options:${normal}"
@@ -493,7 +461,31 @@ mem_info(){
         ps auxf | sort -nr -k 4 | head -5	
 	pause
     }
-# ~~~~~~~~~~~~~~~~< /sysinfo >~~~~~~~~~~~~~~~~#
+
+brightman () {
+    # brightnessctl / Brightness Controller
+    sudo add-apt-repository ppa:apandada1/brightness-controller -y
+    sudo apt-get update -y
+    sudo apt-get install brightness-controller -y
+    echo "Brightness Controller is installed"
+	#pause "Press [Enter] key to continue..."
+	pause
+    }
+slimbatopt () (
+    # Slimbook Battery Optimizer
+    sudo add-apt-repository ppa:slimbook/slimbook -y
+    sudo apt update -y
+    sudo apt install slimbookbattery -y
+    echo "Slimbook Battery Optimizer is installed"
+	#pause "Press [Enter] key to continue..."
+	pause
+    )
+gparted () {
+    sudo apt-get install gparted -y
+    echo "GParted is installed"
+	#pause "Press [Enter] key to continue..."
+    }
+# ~~~~~~~~~~~~~~~~< /system >~~~~~~~~~~~~~~~~
 # execute
 while true
 do 
