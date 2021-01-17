@@ -112,6 +112,7 @@ Date: 2021/01/17
 - wireshark doesn't asks for your username anymore, the shark already knows it
 - fixed the dropbox installation again, with and alternative fix available if the installation broke. Probably still won't work for many users.
 - fixed zoom by adding all its dependencies
+
 (3) Utilities
 - improved the installation of fail2ban
 - removed unused 'portsman' code that belongs to a group of commands im working on
