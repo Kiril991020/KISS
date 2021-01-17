@@ -175,7 +175,7 @@ read_options(){
     insk) install_kirilsprograms ;;
 # -- about
     readme) clear; title; sed -n 1,8p READ.md; pause ;;
-    changelog) clear; title; sed -n 77,107p READ.md; pause ;;
+    changelog) clear; title; sed -n 86,116p READ.md; pause ;;
     back) return ;;
     *) return ;;
 	esac
