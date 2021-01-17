@@ -1,190 +1,436 @@
 #!/bin/bash
 # Kiril's Initial Setup Script for Debian-based Linux Distributions
-ver=0.03
+# Define variables
+ver=0.04
+vername="letmein" 
 # Date
-# date +"%FORMAT_STRING"
 time=$(date +"%Y-%m-%d-%X")
 bold=$(tput bold)
 normal=$(tput sgr0)
-# Define variables
 LSB=/usr/bin/lsb_release
 IFS=$'\n'
+# title=./${bold}kiss${normal}_$ver
+alias kiss-run="bash $pwd/kiss.sh"
+sudo apt-get -q install make autoconf
 menus() {
     clear
-	write_header " ${bold}kiss $ver${normal}/menu "	
-    echo "${bold}(1) GENERAL${normal}"	
-    echo "- about - Information about this script"
-	echo "- exit - exit KISS"
-    echo "${bold}(2) PROGRAMS${normal}"
-    echo "- 1pass - 1Password"
-	echo "- dbox - Dropbox"
-	echo "- zoom - Zoom"
-    echo "- wireshark - Wireshark"
-    echo "- 4k - 4kvideodownloader 4.13.5-1"
-    echo "- mend - Mendeley Desktop"
-    echo "- fshot - Flameshot"
-    echo "- vim - Vim Text editor"
-    echo "- iprogk - Install a pre-determined collection of programs"
-    echo "  ${bold}Browsers:${normal}"
-	echo "- opera - Opera Browser"
-    echo "- brave - Brave Browser"
-#    echo "- chromium - Chromium Browser"
-    echo "- vivaldi - Vivaldi Browser"
-    echo "${bold}(3) SYSTEM ADMINISTRATION${normal}"
-    echo "- brightman - Brightness Controller"
-    echo "- batteryman - Slimbook Battery Optimizer"
-    echo "- gparted - GParted Partition Manager" 
-    echo "- sysinfo - Information about your system"
-	echo "- update - Check and apply updates to your linux distribution"
-    echo "- snap - Enable snap package manager (make sure you know what you are doing)"
-    echo "${bold}(4) NETWORKING & SECURITY${normal}"
-    echo "- fu - Install fail2ban, UFW, and autoconfigure both (see:'about' for more information"
-    echo "- nets - Network statistics"
-	echo "- neti - Network routing, hosts, DNS, and interface traffic information"
-#    echo "- pms - Manage port configuration"
-#    echo "- pmr - Manage port range configuration"
-    echo "- ipt - ip-tools (example:'ipt-b'); For help type ipt-h"
-    echo
-    echo "Help improve this project by giving your feedback and/or taking part in its development" 
-    echo "at github: https://github.com/kiril-u/KISS"
-}
+#	write_header " $title/menu "	
+    title
+    echo "(1) inst-prog - install programs and utilities"
+    echo "(2) ku - kiss utilities"
+    echo "(3) upgrade - check for package updates and/or kernel upgrades"
+    echo "(4) about - information about this script"
+    echo "(5) exit"
+	echo "-------------------------------------"
+    echo "Github: https://github.com/kiril-u/KISS"
+	echo "-------------------------------------"
+    }
+title() {
+	echo "-------------------------------------"
+    echo " _    _            Kiril's"
+    echo '| | _(_)___ ___    Initial'
+    echo '| |/ / / __/ __|   Setup'
+    echo '|   <| \__ \__ \   Script'
+    echo "|_|\_\_|___/___/   $ver"
+	echo "-------------------------------------"
+    }
+
+inst-prog() {
+    clear
+#	write_header " $title/menu/install-programs "	
+    title
+    echo "${bold}Package Managers${normal}"
+        echo "- snap - enables Snap"
+        echo "- flatpak - enables Flatpak"
+    echo "${bold}Network Security${normal}"
+        echo "- f2b - Fail2ban [autoconfigured]"
+        echo "- ufw - Uncomplicated Firewall [autoconfigured]"
+        echo "  - ufw-optional - block some ports used by microsoft systems"
+    echo "${bold}Text Editors${normal}"
+        echo "- vim - text editor"
+        echo "- gedit - gnome text editor"
+        echo "- kate - Kate editor"
+    echo "${bold}Screenshooting${normal}"
+        echo "- fshot - Flameshot"
+        echo "- kspec - KDE Spectacle"
+    echo "${bold}Partition Managers and Image Burners${normal}"
+        echo "- gparted - Gnome partition editor" 
+        echo "- gdu - Gnome disk utility"
+        echo "- sdc - Startup Disk Creator"
+    echo "${bold}Browsers${normal}"
+        echo "- brave - Brave Browser"
+        echo "- opera - Opera Browser"
+        echo "- vivaldi - Vivaldi Browser"
+    echo "${bold}PDF Readers${normal}"
+        echo "- evince - Evince"
+        echo "- zathura - Zathura"
+     echo "${bold}Terminal Emulators${normal}"   
+        echo "- tx - Tilix Terminal"
+        echo "- d-ter - Deepin Terminal" 
+    echo "${bold}Other essential programs: (for me)${normal}"
+        echo "- 1pass - 1Password"
+        #echo "- dbox - Dropbox"
+        echo "- zoom - Zoom"
+        echo "- wireshark - Wireshark"
+        echo "- 4k - 4kvideodownloader 4.13.5-1"
+        echo "- mend - Mendeley Desktop"
+        echo "- times - Timeshift backup tool"
+        echo "- tlp - saving laptop battery power"
+        echo "- rhybox - Rhythmbox"
+        echo "- mpv - mpv Media Player"
+        echo "- ttf - TrueType Fonts (Microsoft)"
+        echo "- tag - Easytag ID3 tags editor"
+        echo "- signal - Signal application for desktop"
+     echo "${bold}CLI Tools and Utilities${normal}"           
+        echo "- ranger - Ranger file manager"
+        #echo "- cmus - C* Music Player"
+        #echo "- cmusfm - Scrobbler for cmus"
+        echo "- iftop - Netowrk monitoring tool"
+        echo "- newsboat - RSS feed tool"
+        echo "- mpsyt - mps-youtube (using youtube in terminal"
+    read_options
+            }
 read_options(){
 	local choice
 	read -e -p "> " choice
 	case $choice in
-        # (1) General
-            about) kissinfo ;;
-            update) update ;;
-            sysinfo) sysinfo_menu ;;
-            snap) snap_enabler ;;
-            exit) exit 0;;
-        # (2) Programs
-            1pass) onepassword ;;
-            dbox) dropbox ;;
-            dropbox) dropbox ;;
-            zoom) zoom ;;
-            wireshark) wireshark ;;
-            4k) fourkdownloader ;;
-            mend) mendeley ;;
-            fshot) flameshot ;;
-            opera) opera ;;
-            opera-snap) operasnap ;;
-            brave) brave ;;
-            chromium) chromium ;;
-            vivaldi) vivaldi ;;
-            vim) vim ;;
-            iprogk) install_kirilsprograms ;;
-        # (3) sysadmin
-            brightman) brightman ;;
-            batteryman) slimbatopt ;;
-            gparted) gparted ;;
-        # (4) Networking and Security
-            fu) fu ;;   
-            nets) net_stat ;;
-            neti) net_info ;;
- #           pms) portman_single ;;
- #           pmr) portman_range ;;
-        # ip-tools
-            ipt) echo "Try: 'ipt-h"; pause ;;
-            ipt-b) banip ;;
-            ipt-u) unbanip ;;
-            ipt-c) checkip ;;
-            ipt-l) blacklist ;;
-            ipt-h) ipthelp ;;
-		    *) echo -e "${RED}Error...${STD}" && sleep 1
+# -- main menu
+	inst-prog) inst-prog ;;
+	1) inst-prog ;;
+	in) inst-prog ;;
+	install-programs) inst-prog ;;
+	inst-prog) inst-prog ;;
+	ku) kiss-util ;;
+	2) kiss-util ;;
+	kiss-utilities) kiss-util ;;
+	3) upgrade ;;
+	upgrade) upgrade ;;
+	up) upgrade ;;
+	4) kissinfo ;;
+	about) kissinfo ;;
+	ab) kissinfo ;;
+	5) exit 0 ;;
+	exit) exit 0 ;;
+	ex) exit 0 ;;
+# -- install-programs
+    snap) snap_enabler ;;
+    flatapk) flatapk ;;
+    f2b) f2b ;;
+    ufw) ufw ;;
+    ufw-optional) ufw-optional ;;
+    vim) vim ;;
+    gedit) gedit ;;
+    fshot) flameshot ;;
+    flameshot) flameshot ;;
+    kspec) kde-spectacle ;;
+    gparted) gparted ;;
+    gdu) gnomedu ;;
+    sdc) usbcg ;;
+    brave) brave ;;
+    brave-fix) bravefix ;;
+    opera) opera ;;
+    operasnap) operasnap ;;
+    vivaldi) vivaldi ;;
+    1pass) onepassword ;;
+    #dbox) dropbox ;;
+    #dropbox) dropbox ;;
+    #dbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
+    #dropbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
+    zoom) zoom ;;
+    wireshark) wireshark ;;
+    4k) fourkdownloader ;;
+    mend) mendeley ;;
+    times) timeshift ;;
+    d-ter) deepin-terminal ;;
+    evince) sudo apt-get -y install evince ; return ;;
+    zathura) sudo apt-get -y install zathura ; return ;;
+    tx) tilix ;;
+    tlp) tlp ;;
+    rhybox) rhybox ;;
+    kwrite) kwrite ;;
+    newsboat) newsboat ;;
+    iftop) iftop ;;
+    ranger) ranger ;;
+    #cmus) cmus ;;
+    #cmusfm) cmusfm ;;
+    mpv) mpv ;;
+    mpsyt) mpsyt ;;
+    kate) kate ;;
+    tts) sudo apt-get -y install ttf-mscorefonts-installer; pause ;;
+    tag) sudo apt-get -y install easytag; pause ;;
+    signal) sudo apt-get -y install signal-desktop; pause ;;
+# -- kiss-utilities
+    ipt) echo "Try: 'ipt-h'"; pause ;;
+    ipt-b) banip ;;
+    ipt-u) unbanip ;;
+    ipt-c) checkip ;;
+    ipt-l) blacklist ;;
+    ipt-h) ipthelp ;;
+    nets) net_stat ;;
+    neti) net_info ;;
+    sysinfo) sysinfo_menu ;;
+    who) user_info "who" ;;
+    last) user_info "last" ;;
+    mem) mem_info ;;
+    insk) install_kirilsprograms ;;
+# -- about
+    readme) clear; title; sed -n 1,8p READ.md; pause ;;
+    changelog) clear; title; sed -n 77,107p READ.md; pause ;;
+    back) return ;;
+    *) return ;;
 	esac
-}
-
+	}
+kiss-util() {
+    clear
+    #write_header " $title/menu/kiss-utilities "	
+    title
+    echo "- iftop - Network Monitoring Tool"
+    echo "- ipt - IP-tools (howto:'ipt-< >'); For help type ipt-h"
+    echo "- nets - Network statistics"
+	echo "- neti - Network routing, hosts, DNS, and interface traffic information"
+	echo "- sysinfo - System Information (Neofetch and some other stuff)"
+    echo "- insk - Install a pre-determined collection of programs"
+    read_options
+    }
 write_header(){
-# Display header message
+    Display header message
 	local h="$@"
 	echo "-------------------------------------"
 	echo "${h}"
 	echo "-------------------------------------"
-}
-kissinfo() {
-	write_header " ${bold}kiss $ver${normal}/menu/about "
-    echo "Kiril's Initial Setup Script for Debian-based Linux Distributions version $ver"
-    echo "readme - read the .md file which also serves as a manual"
-    echo "This script was tested on Ubuntu and Mint (20.04 and 20.10), however, some functions may break on different distributions and/or versions."
-    echo "This project is a result of a hobby/mean of procrastination/ 'QoL improver', for me. As of now,  it serves two purposes: To help new GNU/Linux users get what they need ASAP, and as a tool for practicing shell scripting, for me. "
-    echo "If you find this project useful or otherwise interested in it and/or the process that undergoes working on it, feel free to share your comments, criticizm, or contributions on github."
-
-    echo "${bold}Packages included:${normal}"
-    echo "- fail2ban*"
-    echo "- UFW*"
-    echo "- neofetch*"
-    echo "The default firewall configuration set by the 'fu' command is as follows:"
-    echo "- deny all incoming traffic by default"
-    echo "- allow all outgoing traffic by default"
-    echo "- limit ssh (:22/tcp) for both incoming and outgoing traffic"
-    echo "- allow all traffic for HTTP (:80/tcp) and HTTPS (:443/tcp)"
-    echo
-    echo "your options are readme or back"
-    local choice
-    read -e -p "> " choice
-    case $choice in
-    readme) cat READ.txt; pause ;;
-    back) return ;;
-    esac
     }
 
+kissinfo() {
+    clear
+	#write_header " $title/menu/about "
+    title
+    echo
+    echo "Kirils Initial Setup Script for Debian and Debian-based Linux Distributions version $ver"
+    echo "The script was tested on Linux Mint (19-20.1), Ubuntu (20.04-20.10), Kubuntu and Debian 10"
+    echo 
+    echo "${bold}Menu Navigation:${normal}"
+    echo "To navigate quickly in the main menu, users may type the first two letters of each section" 
+    echo "(for instance, to access the program installation section (inst-prog) you may type 'in', or '1'."
+    echo "Type 'back' anywhere to return to the main menu (or just leave it blank and press [ENTER]"
+    echo "${bold}Information:${normal}"
+    echo "changelog - Read the changelog"
+    echo "readme - read some information about this script"
+    read_options
+    }
 pause() {
 	local message="$@"
 	[ -z $message ] && message="Press [Enter] key to continue..."
 	read -p "$message" readEnterKey
     }
-    
 snap_enabler() {
     # Enabling snap/snapd package manager
-    sudo rm /etc/apt/preferences.d/nosnap.pref
-    sudo apt update
-    sudo apt install snapd
-    sudo snap install snapd
-    sudo install snap-aware
-    echo "Snap package manager is enabled"
-	#pause "Press [Enter] key to continue..."
-	pause
+    sudo rm -q /etc/apt/preferences.d/nosnap.pref
+    sudo apt-get -q update
+    sudo apt-get -y install snapd
+    sudo snap -y install snap-store
+    echo "Snap package manager is enabled. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
+    local choice
+    read -e -p "> " choice
+    case $choice in
+    y) sudo reboot ;;
+    Y) sudo reboot ;;  
+    yes) sudo reboot ;;  
+    n) pause ;;
+    N) pause ;; 
+    no) pause ;; 
+    esac
     }
-update() {
+upgrade() {
     # update distribution
-    sudo apt update -yy
-    sudo apt dist-upgrade -yy
+    sudo apt -q update 
+    sudo apt -yy dist-upgrade 
+    sudo apt -yy autoremove
     pause
     }
-# ~~~~~~~~~~~~~~~~< Programs >~~~~~~~~~~~~~~~~#
+### ikp
 install_kirilsprograms() {
     echo "List of programs included in this bundle:"
-    echo "- 1password"
+    echo "- Fail2ban"
+    echo "- UFW"
+    echo "- Vim"
+    echo "- gedit"
+    echo "- Flameshot"    
+    echo "- Gparted"
+    echo "- Gnome disk utility"
+    echo "- Startup Disk Creator"
+    echo "- Brave Browser"
+    echo "- Evince"
+    echo "- Tilix"
+    echo "- 1Password"
+    echo "- Zoom"
     echo "- 4kvideodownloader"
     echo "- Mendeley Desktop"
-    echo "- Dropbox"
-    echo "- Zoom"    
-    echo "- Brave"
-    echo "- flameshot"
-    echo "- fail2ban"
-    echo "- UFW"
-    echo "- neofetch"
-    echo "- vim & vim-runtime"
+    echo "- Timeshift"
+    echo "- Rhythmbox"
+    echo "- TrueType Fonts"
+    echo "- Ranger"
+    echo "- iftop"
+    echo "- newsboat"    
     local choice
-    read -e -p "Would you like to install these programs? [y/n]" choice
+    read -e -p "Would you like to install these programs? [Y/n]" choice
 	case $choice in
 	n) echo "Aborting..."; sleep 1; return ;;
+	no) echo "Aborting..."; sleep 1; return ;;
+	N) echo "Aborting..."; sleep 1; return ;;
 	y) ikp ;;
+	yes) ikp ;;
+	Y) ikp ;;
 	esac
 	}
 ikp() {
-    onepassword -y
-    4kdownloader -y
-    mendeley -y
-    db2 -y
-    zoom -y
-    brave -y
-    fshot -y
-    fu -y
-    vim -y
-    sudo apt install neofetch -y
-    echo "The installations are complete" 
+    onepassword 
+    4kdownloader 
+    mendeley 
+    zoom 
+    brave 
+    fshot 
+    ufw
+    ufw-optional
+    f2b
+    vim 
+    gedit
+    timeshift
+    tilix
+    gparted
+    sdc
+    rhybox
+    ranger
+    sudo apt -yy install neofetch iftop evince figlet signal-desktop
+    echo "Done." 
+    pause
+    }
+### programs
+rhybox() {
+    sudo add-apt-repository ppa:vascofalves/gnome-backports
+    sudo apt-get update
+    sudo apt-get -y install dbus gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-x libc6 libglib2.0-0 libgstreamer-plugins-base1.0-0 libgstreamer1.0-0 libgtk-3-0 libpeas-1.0-0 librhythmbox-core10 libx11-6 media-player-info rhythmbox-data
+    sudo apt-get -y install rhythmbox
+    pause
+    }
+
+kate() {
+    sudo apt-get -y git cmake
+    git clone https://invent.kde.org/utilities/kate.git
+    cd kate
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/kde/usr \
+  -DCMAKE_PREFIX_PATH=~/kde/usr
+    make
+    make install
+    cd ~/kde/kate
+    git pull --rebase
+    pause
+    }
+
+mpsyt() {
+    #echo 'export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')' >> ~/.bashrc
+    #echo 'export PATH=$PY_USER_BIN:$PATH' >> ~/.bashrc
+    sudo apt-get -y install python-numpy python-scipy python-matplotlib pip3
+    pip3 install --user mps-youtube
+    pip3 install --user youtube-dl
+    pip3 install --user youtube-dl --upgrade
+    pip3 install --user dbus-python pygobject
+    sudo pip3 install mps-youtube --upgrade
+    pause
+    }
+cmus() {
+    sudo add-apt-repository ppa:jmuc/cmus
+    sudo apt-get update
+    # dependencies
+    sudo apt-get -y install cmus cmus-plugin-ffmpeg libao-common libao4 libesd0 libesd-alsa0
+    read -e -p "Would you like to install cmusfm (audio scrobbler for cmus)? [Y/n]" choice
+	case $choice in
+        y) cmusfm ;;
+        Y) cmusfm ;;
+        yes) cmusfm ;;
+        n) return ;;
+        N) return ;;
+        no) return ;;
+    esac
+    }
+cmusfm() {
+    read -e -p "Have you installed cmus? [Y/n]" choice
+    case $choice in
+        y) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        Y) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        yes) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        n) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;; 
+        N) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;;
+        no) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;;
+    esac
+    }
+newsboat () {
+    # git clone git://github.com/newsboat/newsboat.git
+    #dependencies
+    sudo apt-get -y install awk asciidoctor json-c libxml2 pkg-config openssl gettext libcurl4-nss-dev sqlite3 libsqlite3-dev stfl rust clang
+    sudo apt-get -y install newsboat
+    pause
+        }
+mpv() {
+    # dependencies
+    sudo apt-get -y install libarchive13 libasound2 libass9 libavcodec58 libavdevice58 libavfilter7 libavformat58 libavutil56 libbluray2 libc6 libcaca0 libcdio-cdda2 libcdio-paranoia2 libcdio19 libdrm2 libdvdnav4 libegl1 libgbm1 libjack-jackd2-0 libjpeg62-turbo liblcms2-2 liblua5.2-0 libmujs1 libplacebo104 libpulse0 librubberband2 libsdl2-2.0-0 libsixel1 libswresample3 libswscale5 libuchardet0 libva-drm2 libva-wayland2 libva-x11-2 libva2 libvdpau1 libvulkan1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libx11-6 libxext6 libxinerama1 libxkbcommon0 libxrandr2 libxss1 libxv1 libzimg2 vapoursynth zlib1g xdg-utils youtube-dl
+    sudo apt-get -y install mpv
+    pause
+    }
+ranger() {
+    # dependencies part 1
+    sudo apt-get -y install python-bidi python3 curses less chardet caca-utils img2txt w3mimgdisplay ueberzug
+    # dependencies part 2 - mpv
+    sudo apt-get -y install libarchive13 libasound2 libass9 libavcodec58 libavdevice58 libavfilter7 libavformat58 libavutil56 libbluray2 libc6 libcaca0 libcdio-cdda2 libcdio-paranoia2 libcdio19 libdrm2 libdvdnav4 libegl1 libgbm1 libjack-jackd2-0 libjpeg62-turbo liblcms2-2 liblua5.2-0 libmujs1 libplacebo104 libpulse0 librubberband2 libsdl2-2.0-0 libsixel1 libswresample3 libswscale5 libuchardet0 libva-drm2 libva-wayland2 libva-x11-2 libva2 libvdpau1 libvulkan1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libx11-6 libxext6 libxinerama1 libxkbcommon0 libxrandr2 libxss1 libxv1 libzimg2 vapoursynth zlib1g xdg-utils youtube-dl
+    sudo apt-get -y install mpv
+    # dependencies part 3 
+    sudo apt-get -y install iterm2 kitty terminology convert ffmpegthumbnailer highlight atool bsdtar sed lynx pdftotext fmt djvutxt ddjvu calibre transmission-show mediainfo odt2txt python3 fontimage openscad
+    # main installation
+    sudo apt-get -y install ranger-fm
+    echo "For configuration, check the files in ranger/config/ or copy the default config to ~/.config/ranger with ranger --copy-config"
+    pause
+    }
+tilix() {
+    # dependencies
+    sudo apt-get -y install dconf-gsettings-backend libc6 libgcc1 libgtkd-3-0 libphobos2-ldc-shared82 libvted-3-0 libx11-6 tilix-common python-nautilus
+    sudo apt-get update
+    sudo apt-get -y install tilix
+    pause
+    }
+tlp() {
+    echo 'deb http://ftp.debian.org/debian buster-backports main' >> /etc/apt/sources.list
+    sudo apt -y update
+    sudo apt-get -y install tlp tlp-rdw
+    pause
+    }
+timeshift() {
+    sudo apt-add-repository -y ppa:teejee2008/ppa
+    sudo apt-get update
+    sudo apt-get install timeshift
+    sudo chmod +x timeshift-latest-amd64.run
+    sh ./timeshift-latest-amd64.run
+    pause
+    }
+    
+deepin-terminal() {
+    sudo add-apt-repository ppa:noobslab/deepin-sc
+    sudo apt-get update
+    sudo apt-get -y install deepin-terminal
+    pause
+    }
+    
+kde-spectacle() {
+    sudo apt-get update -y
+    sudo apt-get install -y kde-spectacle
+    pause
+    }
+gnomedu() {
+    sudo apt-get -y install -y gnome-disk-utility gnome-disk-image-mounter gsd-disk-utility-notify
+    pause
+    }
+usbcg() {
+    sudo apt-get -y install usb-creator-gtk
     pause
     }
 onepassword() {
@@ -193,59 +439,47 @@ onepassword() {
     # Add the 1Password apt repository
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] https://downloads.1password.com/linux/debian edge main' | sudo tee /etc/apt/sources.list.d/1password.list
     # Install 1Password
-    sudo apt update && sudo apt install 1password
-    echo "1password is installed"
-	#pause "Press [Enter] key to continue..."
+    sudo apt-get update && sudo apt-get install 1password
 	pause
     }
 zoom() {
-# Installing dependencies
-#sudo apt install ibus ibus-data ibusgtk ibusgtk3 libegl1-mesa libxcb-xtest0 python3-ibus-1.0
-    sudo apt install zoom
-    echo "Zoom is installed"
-	#pause "Press [Enter] key to continue..."
-	pause
+    # installing dependencies
+    sudo apt-get -y install libglib2.0-0 libgstreamer-plugins-base0.10-0  libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-randr0 libxcb-image0 libfontconfig1 libgl1-mesa-glx libxi6 libsm6 libxrender1 libpulse0 libxcomposite1 libxslt1.1 libsqlite3-0 libxcb-keysyms1 libxcb-xtest0
+    sudo apt-get -y update
+    wget https://zoom.us/client/latest/zoom_amd64.deb
+    sudo dpkg -i zoom_amd64.deb
+    rm zoom_amd64.deb
+    pause
     }
 fourkdownloader() {
     wget https://dl.4kdownload.com/app/4kvideodownloader_4.13.5-1_amd64.deb
     sudo dpkg -i 4kvideodownloader_4.13.5-1_amd64.deb
     rm 4kvideodownloader_4.13.5-1_amd64.deb
-    echo "4kvideodownloader is installed"
-	#pause "Press [Enter] key to continue..."
 	pause
     }
 mendeley() {
     wget https://www.mendeley.com/repositories/ubuntu/stable/amd64/mendeleydesktop-latest
     sudo dpkg -i mendeleydesktop-latest
     rm mendeleydesktop-latest
-    echo "Mendeley Desktop is installed"
-	#pause "Press [Enter] key to continue..."
 	pause
     }
 dropbox() {
-    cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
-    ~/.dropbox-dist/dropboxd
-	#pause "Press [Enter] key to continue..."
-	pause
+    cd ~ && wget "https://linux.dropbox.com/packages/nautilus-dropbox-2020.03.04.tar.bz2"
+    tar xjf ./nautilus-dropbox-2020.03.04.tar.bz2
+    cd ./nautilus-dropbox-2020.03.04; ./configure; make; make install;
+	sudo "Done. However, if the installation failed, you may try to fix it by typing dbox-fix. Otherwise, press [Enter]." 
+	local choice
+    read -e -p "> " choice
+    case $choice in
+    dbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
+    dropbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
+    *) pause ;;
+    esac
     }
-#dropbox2() {
-#    wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb
-#    sudo dpkg -i dropbox_2020.03.04_amd64.deb
-#    rm dropbox_2020.03.04_amd64
-#   }
-	
-#dropbox2() {
-#    wget https://linux.dropbox.com/packages/ubuntu/nautilus-dropbox_2020.03.04_all.deb
-#    sudo apt install dropbox
-#    sudo dpkg -i nautilus-dropbox_2020.03.04_all.deb
-#    rm nautilus-dropbox_2020.03.04_all.deb
-    #pause "Press [Enter] key to continue..."
-#	pause
-#    }
 wireshark() {
-    read -e -p "enter your username: " name
+    local u="$USER"
     sudo apt-get install libcap2-bin wireshark
-    sudo chgrp $name /usr/bin/dumpcap
+    sudo chgrp $u /usr/bin/dumpcap
     sudo chmod 750 /usr/bin/dumpcap
     sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
     echo "Wireshark is installed"
@@ -253,108 +487,128 @@ wireshark() {
 	pause
     }
 flameshot() {
-    sudo apt install flameshot
+    sudo apt-get -y install flameshot
     pause
     }
-    vim() {
-    sudo apt install vim vim-runtime
-    echo "vim is installed"
-	#pause "Press [Enter] key to continue..."
+vim() {
+    sudo apt-get -yy install vim vim-runtime
 	pause
     }
-
-# ~~~~~~~~~~~~~~~~< /Programs >~~~~~~~~~~~~~~~~#
-# ~~~~~~~~~~~~~~~~< Browsers >~~~~~~~~~~~~~~~~#
-
+gparted () {
+    sudo apt-get -y install gparted
+	pause
+    }
+##### Browsers
 opera() {
     sudo apt update
     sudo apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
     wget -qO- https://deb.opera.com/archive.key | sudo apt-key add -
     sudo add-apt-repository "deb [arch=i386,amd64] https://deb.opera.com/opera-stable/ stable non-free"
-    sudo apt install opera-stable
-    echo "Opera Browser should be installed. However, if it failed to do so, type 'opera-snap' on the main menu"
-	#pause "Press [Enter] key to continue..."
-	pause
+    sudo apt-get -y update
+    sudo apt-get -y install opera-stable
+    echo "Done. Has your installation completed successfully? [Y/n]"
+    echo "If it didn't, Opera may be installed from Snap, if you've enabled it. In that case, you may type 'operasnap'" to let the script enable snap, and then install Opera from its repository. 
+    local choice
+    read -e -p "> " choice
+    case $choice in
+    y) pause ;;
+    yes) pause ;;
+    Y) pause ;;
+    n) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
+    no) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
+    N) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
+    operasnap) operasnap ;;
+    esac
     }
 operasnap() {
-    echo "enabling snap"
+# Enabling snap/snapd package manager
+    sudo rm -q /etc/apt/preferences.d/nosnap.pref
+    sudo apt-get -q update
+    sudo apt-get -y install snapd
     snap -y
-    echo "installing opera"
-    snap install opera
- echo "Opera Browser is installed"
-	#pause "Press [Enter] key to continue..."
-	pause
+    sudo snap install -y opera
+    sudo snap -y install snap-store
+    echo "Snap package manager is enabled, and Opera Browser has been installed. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
+    local choice
+    read -e -p "> " choice
+    case $choice in
+    y) sudo reboot ;;
+    Y) sudo reboot ;; 
+    yes) sudo reboot ;; 
+    n) pause ;;
+    N) pause ;;
+    no) pause ;;
+    esac
     }
 brave() {
-    sudo apt install apt-transport-https curl gnupg
+    sudo apt-get -y install apt-transport-https curl gnupg
     curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | sudo apt-key --keyring /etc/apt/trusted.gpg.d/brave-browser-release.gpg add -
     echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-    sudo apt update
-    sudo apt install brave-browser
-    echo "Brave Browser is installed"
-	#pause "Press [Enter] key to continue..."
+    sudo apt-get -y update 
+    sudo apt-get -y install brave-browser
+    echo "Done. Has your installation completed successfully? [y/n/del]"
+    local choice
+    read -e -p "> " choice
+    case $choice in
+    y) pause ;;
+    yes) pause ;;
+    Y) pause ;;
+    n) echo "trying to fix it.."; brave-fix ;;
+    no) echo "trying to fix it.."; brave-fix ;;
+    N) echo "trying to fix it.."; brave-fix ;;
+    del) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
+    delete) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
+    esac
+    echo "If your installation failed, try 'brave-fix' for an alternative solution"
 	pause
     }
-chromium() {
-    sudo apt install chromium 
-    echo "Chromium Browser is installed"
-	#pause "Press [Enter] key to continue..."
-	pause
+brave-fix() {
+    sudo apt-get -q rm brave-browser libgnutls-deb0-28
+    sudo apt-get -q install librtmp1=2.4+20151223.gitfa8646d.1-1+b1 
+    brave
     }
 vivaldi() {
-    echo "deb http://repo.vivaldi.com/stable/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list > /dev/null
-    wget -O - http://repo.vivaldi.com/stable/linux_signing_key.pub | sudo apt-key add -
-    sudo apt update && sudo apt install vivaldi-stable -yy
+    wget -qO- https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo apt-key add -
+    sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
+    sudo apt-get -y update && sudo apt-get -y install vivaldi-stable
+    ## this is the old, working installation ##
+    #echo "deb http://repo.vivaldi.com/stable/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list > /dev/null
+    #wget -O - http://repo.vivaldi.com/stable/linux_signing_key.pub | sudo apt-key add -
+    #sudo apt update && sudo apt install vivaldi-stable -yy
     #sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
-    echo "Vivaldi Browser is installed"
-	#pause "Press [Enter] key to continue..."
 	pause
     }
-    
-# ~~~~~~~~~~~~~~~~< /Browsers >~~~~~~~~~~~~~~~~#
-# ~~~~~~~~~~~~~~~~< Security >~~~~~~~~~~~~~~~~#
-
-fu() {
-    sudo apt install fail2ban
-    sudo apt install ufw
-# --- Enable fail2ban
-    sudo cp fail2ban.local /etc/fail2ban/
+### Network security
+f2b() {
+    sudo apt-get -y install fail2ban
+    sudo cp -q /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+    echo 'maxretry = 3' >> /etc/fail2ban/jail.local
+    echo 'enable = true' >> /etc/fail2ban/jail.local
     sudo systemctl enable fail2ban
     sudo systemctl start fail2ban
-# --- Setup UFW rules
-    sudo ufw limit 22/tcp  
-    sudo ufw allow 80/tcp  
-    sudo ufw allow 443/tcp  
-    sudo ufw default deny incoming  
-    sudo ufw default allow outgoing
-    sudo ufw enable
-# --- Harden /etc/sysctl.conf
-    sudo sysctl kernel.modules_disabled=1
-    sudo sysctl -a
-    sudo sysctl -A
-    sudo sysctl mib
-    sudo sysctl net.ipv4.conf.all.rp_filter
-    sudo sysctl -a --pattern 'net.ipv4.conf.(eth|wlan)0.arp'
-# --- PREVENT IP SPOOFS
-cat <<EOF > /etc/host.conf
-order bind,hosts
-multi on
-EOF
+    sudo fail2ban-client status
+    pause
+    }
+iftop() {
+    sudo apt-get -y install iftop
+    sudo iftop
     }
 net_stat () {
-	write_header " KISS $ver/Menu/Network_Statistics "
+	#write_header " $title/menu/nets "	
+    title
+    sudo apt-get -q install net-tools
     sudo ss -pantu
-     echo 
-     echo "To export current terminal output, type 'save'. Otherwise, type 'back' or press [Enter] key to return to the main menu"
+    echo 
+    echo "To export current terminal output, type 'save'. Otherwise, type 'back' or press [Enter] key to return to the main menu"
     local choice
 	read -e -p "> " choice
 	case $choice in
-	save) sudo ss -pantu > KISS-netbro-stat-${time}.txt 2>&1 && cat KISS-netbro-stat-${time}.txt; return ;;
-    back) return ;;
+	save) sudo ss -pantu > KISS-nets-${time}.txt 2>&1 && cat KISS-nets-${time}.txt; pause ;;
+    back) pause ;;
 	esac
-	pause
     }
 net_info() {
+    sudo apt-get -q install net-tools
     # Purpose - Get info about host such as dns, IP, and hostname
 	local dnsips=$(sed -e '/^$/d' /etc/resolv.conf | awk '{if (tolower($1)=="nameserver") print $2}')
 	write_header " Hostname and DNS information "
@@ -377,72 +631,91 @@ net_info() {
 	netstat -nr
     write_header " Interface traffic information "
 	netstat -i
-    echo 
-    # echo "To export current terminal output, type 'save'. Otherwise, type 'back' or press [Enter] key to return to the main menu"
-	# save) net_info > KISS-netbro-info-${time}.txt 2>&1 && cat KISS-netbro-info-${time} ;;
     pause
     }
-### IP-tools
+### ip-tools
 banip() {
-    read "Type an ip address that you want to ban from your machine: " ipinput
-    sudo iptables -A INPUT -s $ipinput -j DROP
+    local choice 
+    echo "Type an ip address that you want to ban from your machine:"
+    read -e -p "> " choice
+    sudo iptables -A INPUT -s $choice -j DENY
     service iptables save
-    echo "$ipinput is now blocked from accessing your device"
+    echo "$choice is now blocked from accessing your device"
     pause
     }
 unbanip() {
-    read "Type an ip address that you want to unban from your machine: " ipinput
-    sudo iptables -D INPUT -s $ipinput -j DROP
+    local choice 
+    echo "Type an ip address that you want to unban from your machine:" 
+    read -e -p "> " choice
+    sudo iptables -D INPUT -s $choice -j DENY
     service iptables save
-    echo "$ipinput is no longer blocked from accessing your device"
+    echo "$choice is no longer blocked from accessing your device"
     pause
     }
 checkip() {
-    read " :" ipinput
-    sudo iptables -L INPUT -v -n | grep $ipinput
+    local choice
+    echo "Type an ip address to check whether it has previously banned:"
+    read -e -p "> " choice
+    sudo iptables -L INPUT -v -n | grep $choice
     service iptables save
     echo "Done"
     pause
     }
 blacklist () {
-    sudo iptables -L INPUT -v -n --line-numbers | grep DROP
+    sudo iptables -L INPUT -v -n --line-numbers | grep DENY
     pause
     }
-
 ipthelp () {
-    write_header " kiss $ver/menu/ip-tools_help "
-    echo "ip-tools is meant to be used for handling the access or the denial of access to and from various clients and servers to your machine. It is a work in progress"
+    # write_header " $title/menu/ip-tools_help "
+    echo "${bold}ip-tools_help${normal}:"
     echo "- ipt-b - Deny access to a specific ip address"
     echo "- ipt-u - Revert a previously given ban to a specific ip address"
     echo "- ipt-c - check the status of a certain ip address"
     echo "- ipt-l - view a list of the ip addresses that are banned from your machine"
     echo "- ipt-h - read this list again from the main menu"
-	#pause "Press [Enter] key to continue..."
-	pause
+	read_options
     }
-### /IP-tools
-# ~~~~~~~~~~~~~~~~< /Security >~~~~~~~~~~~~~~~~#
-# ~~~~~~~~~~~~~~~~< system >~~~~~~~~~~~~~~~~#
+ufw() {
+    sudo apt-get -y install ufw
+    # setup ufw rules
+    echo "Adding basic rules to ufw..."
+    sudo ufw limit 22/tcp  
+    sudo ufw allow 80/tcp  
+    sudo ufw allow 443/tcp  
+    sudo ufw default deny incoming  
+    sudo ufw default allow outgoing
+    sudo ufw enable
+    # Harden /etc/sysctl.conf
+    sudo sysctl kernel.modules_disabled = 1
+    sudo sysctl -a
+    sudo sysctl -A
+    sudo sysctl mib
+    sudo sysctl net.ipv4.conf.all.rp_filter
+    sudo sysctl -a --pattern 'net.ipv4.conf.(eth|wlan)0.arp'
+    }
+ufw-optional() {
+    echo "Adding an optional set of ufw rules"
+    sudo ufw deny 135
+    sudo ufw deny 137
+    sudo ufw deny 139
+    sudo ufw deny 145
+    sudo ufw deny 445
+    sudo ufw deny 5800
+    sudo ufw deny 5900
+    }
+### information
 sysinfo_menu() {
-    write_header " kiss $ver/menu/sysinfo "
+    clear
+    # write_header " $title/menu/sysinfo "	
+	title
 	sudo apt install neofetch -y &>/dev/null
 	neofetch
 	echo "${bold}More options:${normal}"
 	echo "- who - Who is online"
 	echo "- last - Last logged in users"
 	echo "- mem - Free and used memory info"
-	echo "- back - Go back to the main menu"
-    # Get input via the keyboard and make a decision using case..esac 
-	local choice
-	read -e -p "input: " choice
-	case $choice in
-		who) user_info "who" ;;
-		last) user_info "last" ;;
-		mem) mem_info ;;
-		back) return ;;
-		*) echo -e "${RED}Error...${STD}" && sleep 1
-	esac
-	pause
+	echo "- back"
+    read_options
     }  
 user_info() {
 	local cmd="$1"
@@ -451,8 +724,8 @@ user_info() {
 		last) write_header " List of last logged in users "; last ; pause ;;
 	esac 
     }
-    # Display used and free memory info
 mem_info(){
+    # Display used and free memory info
 	write_header " Free and used memory "
         free -m
 	write_header " Virtual memory statistics "
@@ -461,34 +734,8 @@ mem_info(){
         ps auxf | sort -nr -k 4 | head -5	
 	pause
     }
-
-brightman () {
-    # brightnessctl / Brightness Controller
-    sudo add-apt-repository ppa:apandada1/brightness-controller -y
-    sudo apt-get update -y
-    sudo apt-get install brightness-controller -y
-    echo "Brightness Controller is installed"
-	#pause "Press [Enter] key to continue..."
-	pause
-    }
-slimbatopt () (
-    # Slimbook Battery Optimizer
-    sudo add-apt-repository ppa:slimbook/slimbook -y
-    sudo apt update -y
-    sudo apt install slimbookbattery -y
-    echo "Slimbook Battery Optimizer is installed"
-	#pause "Press [Enter] key to continue..."
-	pause
-    )
-gparted () {
-    sudo apt-get install gparted -y
-    echo "GParted is installed"
-	#pause "Press [Enter] key to continue..."
-    }
-# ~~~~~~~~~~~~~~~~< /system >~~~~~~~~~~~~~~~~
 # execute
-while true
-do 
+while (true) do 
     history -s "$choice"
     menus
     read_options
