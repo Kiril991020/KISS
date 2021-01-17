@@ -1,5 +1,7 @@
 Date: 2021-01-17
+
 Name: Kiril's Initial Setup Script for Debian and Debian-based Linux Distributions (KISS)
+
 Version: 0.04 (letmein)
 
 Description
@@ -8,8 +10,7 @@ This script was originally meant to be an installer of some programs and package
 
 Contents
 
-1. Program Installation
-
+# 1. Program Installation
 Package Managers
 - snap - enables Snap
 - flatpak - enables Flatpak
@@ -18,7 +19,7 @@ Network Security
 - f2b - Fail2ban [autoconfigured]
 - ufw - Uncomplicated Firewall [autoconfigured]
   - ufw-optional - block some ports used by microsoft systems
-
+  
 Text Editors
 - vim - text editor
 - gedit - gnome text editor
@@ -66,7 +67,7 @@ CLI Tools and Utilities
 - newsboat - RSS feed tool
 - mpsyt - mps-youtube (using youtube in terminal
 
-2. Kiss Utilities
+# 2. Kiss Utilities
 - iftop - Network Monitoring Tool
 - ipt - IP-tools (howto:'ipt-< >'); For help type ipt-h
 - nets - Network statistics
@@ -74,10 +75,10 @@ CLI Tools and Utilities
 - sysinfo - System Information (Neofetch and some other stuff)
 - insk - Install a pre-determined collection of programs
 
-3. Upgrade
+# 3. Upgrade
 - checks for updates, distro/kernel upgrades, autoremove.
 
-4. About
+# 4. About
 - changelog
 - readme
 
@@ -85,7 +86,7 @@ CLI Tools and Utilities
 - exits the script
 -----------------------------------------------------------------------------------------------
 Date: 2021/01/17
-CHANGELOG for kiss v0.04 (letmein)
+# CHANGELOG for kiss v0.04 (letmein)
 
 (1) GENERAL
 - fixed errors and typos on some of the menus (probably added ones as well)
@@ -115,4 +116,3 @@ CHANGELOG for kiss v0.04 (letmein)
 - improved the installation of fail2ban
 - removed unused 'portsman' code that belongs to a group of commands im working on
 - merged all ip* commands to a single command - ipt.
-
