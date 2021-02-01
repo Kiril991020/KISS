@@ -1,7 +1,7 @@
 #!/bin/bash
 # Kiril's Initial Setup Script for Debian-based Linux Distributions
 # Define variables
-ver=0.04
+ver=0.041
 vername="letmein" 
 # Date
 time=$(date +"%Y-%m-%d-%X")
@@ -10,8 +10,8 @@ normal=$(tput sgr0)
 LSB=/usr/bin/lsb_release
 IFS=$'\n'
 # title=./${bold}kiss${normal}_$ver
-alias kiss-run="bash $pwd/kiss.sh"
-sudo apt-get -q install make autoconf
+echo 'alias kiss="bash $pwd/kiss.sh"' >> /home/$USER/.bashrc/ 
+sudo apt-get install make autoconf --no-install-recommends
 menus() {
     clear
 #	write_header " $title/menu "	
@@ -156,7 +156,7 @@ read_options(){
     mpv) mpv ;;
     mpsyt) mpsyt ;;
     kate) kate ;;
-    tts) sudo apt-get -y install ttf-mscorefonts-installer; pause ;;
+    ttf) sudo apt-get -y install ttf-mscorefonts-installer; pause ;;
     tag) sudo apt-get -y install easytag; pause ;;
     signal) sudo apt-get -y install signal-desktop; pause ;;
 # -- kiss-utilities
@@ -300,7 +300,7 @@ ikp() {
     sdc
     rhybox
     ranger
-    sudo apt -yy install neofetch iftop evince figlet signal-desktop
+    sudo apt -yy install neofetch iftop evince figlet signal-desktop --no-install-recommends
     echo "Done." 
     pause
     }
@@ -308,8 +308,7 @@ ikp() {
 rhybox() {
     sudo add-apt-repository ppa:vascofalves/gnome-backports
     sudo apt-get update
-    sudo apt-get -y install dbus gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-x libc6 libglib2.0-0 libgstreamer-plugins-base1.0-0 libgstreamer1.0-0 libgtk-3-0 libpeas-1.0-0 librhythmbox-core10 libx11-6 media-player-info rhythmbox-data
-    sudo apt-get -y install rhythmbox
+    sudo apt-get -y install rhythmbox --no-install-recommends
     pause
     }
 
@@ -331,7 +330,7 @@ kate() {
 mpsyt() {
     #echo 'export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')' >> ~/.bashrc
     #echo 'export PATH=$PY_USER_BIN:$PATH' >> ~/.bashrc
-    sudo apt-get -y install python-numpy python-scipy python-matplotlib pip3
+    sudo apt-get -y install python3-pip --no-install-recommends
     pip3 install --user mps-youtube
     pip3 install --user youtube-dl
     pip3 install --user youtube-dl --upgrade
@@ -340,10 +339,9 @@ mpsyt() {
     pause
     }
 cmus() {
-    sudo add-apt-repository ppa:jmuc/cmus
+    # sudo add-apt-repository ppa:jmuc/cmus
     sudo apt-get update
-    # dependencies
-    sudo apt-get -y install cmus cmus-plugin-ffmpeg libao-common libao4 libesd0 libesd-alsa0
+    sudo apt-get -y install cmus --no-install-recommends
     read -e -p "Would you like to install cmusfm (audio scrobbler for cmus)? [Y/n]" choice
 	case $choice in
         y) cmusfm ;;
@@ -368,34 +366,22 @@ cmusfm() {
 newsboat () {
     # git clone git://github.com/newsboat/newsboat.git
     #dependencies
-    sudo apt-get -y install awk asciidoctor json-c libxml2 pkg-config openssl gettext libcurl4-nss-dev sqlite3 libsqlite3-dev stfl rust clang
-    sudo apt-get -y install newsboat
+    sudo apt-get -y install newsboat --no-install-recommends
     pause
         }
 mpv() {
-    # dependencies
-    sudo apt-get -y install libarchive13 libasound2 libass9 libavcodec58 libavdevice58 libavfilter7 libavformat58 libavutil56 libbluray2 libc6 libcaca0 libcdio-cdda2 libcdio-paranoia2 libcdio19 libdrm2 libdvdnav4 libegl1 libgbm1 libjack-jackd2-0 libjpeg62-turbo liblcms2-2 liblua5.2-0 libmujs1 libplacebo104 libpulse0 librubberband2 libsdl2-2.0-0 libsixel1 libswresample3 libswscale5 libuchardet0 libva-drm2 libva-wayland2 libva-x11-2 libva2 libvdpau1 libvulkan1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libx11-6 libxext6 libxinerama1 libxkbcommon0 libxrandr2 libxss1 libxv1 libzimg2 vapoursynth zlib1g xdg-utils youtube-dl
-    sudo apt-get -y install mpv
+    sudo apt-get -y install mpv --no-install-recommends
     pause
     }
 ranger() {
-    # dependencies part 1
-    sudo apt-get -y install python-bidi python3 curses less chardet caca-utils img2txt w3mimgdisplay ueberzug
-    # dependencies part 2 - mpv
-    sudo apt-get -y install libarchive13 libasound2 libass9 libavcodec58 libavdevice58 libavfilter7 libavformat58 libavutil56 libbluray2 libc6 libcaca0 libcdio-cdda2 libcdio-paranoia2 libcdio19 libdrm2 libdvdnav4 libegl1 libgbm1 libjack-jackd2-0 libjpeg62-turbo liblcms2-2 liblua5.2-0 libmujs1 libplacebo104 libpulse0 librubberband2 libsdl2-2.0-0 libsixel1 libswresample3 libswscale5 libuchardet0 libva-drm2 libva-wayland2 libva-x11-2 libva2 libvdpau1 libvulkan1 libwayland-client0 libwayland-cursor0 libwayland-egl1 libx11-6 libxext6 libxinerama1 libxkbcommon0 libxrandr2 libxss1 libxv1 libzimg2 vapoursynth zlib1g xdg-utils youtube-dl
-    sudo apt-get -y install mpv
-    # dependencies part 3 
-    sudo apt-get -y install iterm2 kitty terminology convert ffmpegthumbnailer highlight atool bsdtar sed lynx pdftotext fmt djvutxt ddjvu calibre transmission-show mediainfo odt2txt python3 fontimage openscad
     # main installation
-    sudo apt-get -y install ranger-fm
+    sudo apt-get -y install ranger --no-install-recommends
     echo "For configuration, check the files in ranger/config/ or copy the default config to ~/.config/ranger with ranger --copy-config"
     pause
     }
 tilix() {
     # dependencies
-    sudo apt-get -y install dconf-gsettings-backend libc6 libgcc1 libgtkd-3-0 libphobos2-ldc-shared82 libvted-3-0 libx11-6 tilix-common python-nautilus
-    sudo apt-get update
-    sudo apt-get -y install tilix
+    sudo apt-get -y install tilix --no-install-recommends
     pause
     }
 tlp() {
@@ -416,21 +402,21 @@ timeshift() {
 deepin-terminal() {
     sudo add-apt-repository ppa:noobslab/deepin-sc
     sudo apt-get update
-    sudo apt-get -y install deepin-terminal
+    sudo apt-get -y install deepin-terminal --no-install-recommends
     pause
     }
     
 kde-spectacle() {
     sudo apt-get update -y
-    sudo apt-get install -y kde-spectacle
+    sudo apt-get install -y kde-spectacle --no-install-recommends
     pause
     }
 gnomedu() {
-    sudo apt-get -y install -y gnome-disk-utility gnome-disk-image-mounter gsd-disk-utility-notify
+    sudo apt-get -y install -y gnome-disk-utility gnome-disk-image-mounter gsd-disk-utility-notify --no-install-recommends
     pause
     }
 usbcg() {
-    sudo apt-get -y install usb-creator-gtk
+    sudo apt-get -y install usb-creator-gtk --no-install-recommends
     pause
     }
 onepassword() {
@@ -439,12 +425,12 @@ onepassword() {
     # Add the 1Password apt repository
     echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password.gpg] https://downloads.1password.com/linux/debian edge main' | sudo tee /etc/apt/sources.list.d/1password.list
     # Install 1Password
-    sudo apt-get update && sudo apt-get install 1password
+    sudo apt-get update && sudo apt-get install 1password --no-install-recommends
 	pause
     }
 zoom() {
     # installing dependencies
-    sudo apt-get -y install libglib2.0-0 libgstreamer-plugins-base0.10-0  libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-randr0 libxcb-image0 libfontconfig1 libgl1-mesa-glx libxi6 libsm6 libxrender1 libpulse0 libxcomposite1 libxslt1.1 libsqlite3-0 libxcb-keysyms1 libxcb-xtest0
+    # sudo apt-get -y install libglib2.0-0 libgstreamer-plugins-base0.10-0  libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-randr0 libxcb-image0 libfontconfig1 libgl1-mesa-glx libxi6 libsm6 libxrender1 libpulse0 libxcomposite1 libxslt1.1 libsqlite3-0 libxcb-keysyms1 libxcb-xtest0
     sudo apt-get -y update
     wget https://zoom.us/client/latest/zoom_amd64.deb
     sudo dpkg -i zoom_amd64.deb
@@ -478,7 +464,7 @@ dropbox() {
     }
 wireshark() {
     local u="$USER"
-    sudo apt-get install libcap2-bin wireshark
+    sudo apt-get install libcap2-bin wireshark --no-install-recommends
     sudo chgrp $u /usr/bin/dumpcap
     sudo chmod 750 /usr/bin/dumpcap
     sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
@@ -487,15 +473,15 @@ wireshark() {
 	pause
     }
 flameshot() {
-    sudo apt-get -y install flameshot
+    sudo apt-get -y install flameshot --no-install-recommends
     pause
     }
 vim() {
-    sudo apt-get -yy install vim vim-runtime
+    sudo apt-get -yy install vim vim-runtime --no-install-recommends
 	pause
     }
 gparted () {
-    sudo apt-get -y install gparted
+    sudo apt-get -y install gparted --no-install-recommends
 	pause
     }
 ##### Browsers
@@ -524,9 +510,9 @@ operasnap() {
 # Enabling snap/snapd package manager
     sudo rm -q /etc/apt/preferences.d/nosnap.pref
     sudo apt-get -q update
-    sudo apt-get -y install snapd
+    sudo apt-get -y install snapd --no-install-recommends
     snap -y
-    sudo snap install -y opera
+    sudo snap install opera
     sudo snap -y install snap-store
     echo "Snap package manager is enabled, and Opera Browser has been installed. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
     local choice
@@ -541,7 +527,7 @@ operasnap() {
     esac
     }
 brave() {
-    sudo apt-get -y install apt-transport-https curl gnupg
+    sudo apt-get -y install apt-transport-https curl gnupg --no-install-recommends
     curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | sudo apt-key --keyring /etc/apt/trusted.gpg.d/brave-browser-release.gpg add -
     echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
     sudo apt-get -y update 
@@ -559,7 +545,6 @@ brave() {
     del) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
     delete) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
     esac
-    echo "If your installation failed, try 'brave-fix' for an alternative solution"
 	pause
     }
 brave-fix() {
@@ -580,7 +565,7 @@ vivaldi() {
     }
 ### Network security
 f2b() {
-    sudo apt-get -y install fail2ban
+    sudo apt-get -y install fail2ban --no-install-recommends
     sudo cp -q /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
     echo 'maxretry = 3' >> /etc/fail2ban/jail.local
     echo 'enable = true' >> /etc/fail2ban/jail.local
@@ -590,13 +575,13 @@ f2b() {
     pause
     }
 iftop() {
-    sudo apt-get -y install iftop
+    sudo apt-get -y install iftop  --no-install-recommends
     sudo iftop
     }
 net_stat () {
 	#write_header " $title/menu/nets "	
     title
-    sudo apt-get -q install net-tools
+    sudo apt-get -y install net-tools --no-install-recommends
     sudo ss -pantu
     echo 
     echo "To export current terminal output, type 'save'. Otherwise, type 'back' or press [Enter] key to return to the main menu"
@@ -608,7 +593,7 @@ net_stat () {
 	esac
     }
 net_info() {
-    sudo apt-get -q install net-tools
+    sudo apt-get -y install net-tools --no-install-recommends
     # Purpose - Get info about host such as dns, IP, and hostname
 	local dnsips=$(sed -e '/^$/d' /etc/resolv.conf | awk '{if (tolower($1)=="nameserver") print $2}')
 	write_header " Hostname and DNS information "
@@ -638,7 +623,7 @@ banip() {
     local choice 
     echo "Type an ip address that you want to ban from your machine:"
     read -e -p "> " choice
-    sudo iptables -A INPUT -s $choice -j DENY
+    sudo iptables -A INPUT -s $choice -j DROP
     service iptables save
     echo "$choice is now blocked from accessing your device"
     pause
@@ -647,7 +632,7 @@ unbanip() {
     local choice 
     echo "Type an ip address that you want to unban from your machine:" 
     read -e -p "> " choice
-    sudo iptables -D INPUT -s $choice -j DENY
+    sudo iptables -D INPUT -s $choice -j DROP
     service iptables save
     echo "$choice is no longer blocked from accessing your device"
     pause
@@ -662,7 +647,7 @@ checkip() {
     pause
     }
 blacklist () {
-    sudo iptables -L INPUT -v -n --line-numbers | grep DENY
+    sudo iptables -L INPUT -v -n --line-numbers | grep DROP
     pause
     }
 ipthelp () {
@@ -676,12 +661,12 @@ ipthelp () {
 	read_options
     }
 ufw() {
-    sudo apt-get -y install ufw
+    sudo apt-get -y install ufw gufw --no-install-recommends
     # setup ufw rules
     echo "Adding basic rules to ufw..."
-    sudo ufw limit 22/tcp  
-    sudo ufw allow 80/tcp  
-    sudo ufw allow 443/tcp  
+    sudo ufw deny 22/tcp  
+    sudo ufw allow out 80/tcp  
+    sudo ufw allow out 443/tcp  
     sudo ufw default deny incoming  
     sudo ufw default allow outgoing
     sudo ufw enable
@@ -695,15 +680,28 @@ ufw() {
     }
 ufw-optional() {
     echo "Adding an optional set of ufw rules"
-    sudo ufw deny 135
-    sudo ufw deny 137
-    sudo ufw deny 139
-    sudo ufw deny 145
-    sudo ufw deny 445
-    sudo ufw deny 5800
-    sudo ufw deny 5900
+    sudo ufw deny 135 &>/dev/null
+    sudo ufw deny 137 &>/dev/null
+    sudo ufw deny 138 &>/dev/null
+    sudo ufw deny 139 &>/dev/null
+    sudo ufw deny 145 &>/dev/null
+    sudo ufw deny 445 &>/dev/null
+    sudo ufw deny 5800 &>/dev/null
+    sudo ufw deny 5900 &>/dev/null
+    sudo ufw deny 3389 &>/dev/null
+    sudo ufw deny out 3389 &>/dev/null
+    sudo ufw deny out 135 &>/dev/null
+    sudo ufw deny out 137 &>/dev/null
+    sudo ufw deny out 138 &>/dev/null
+    sudo ufw deny out 139 &>/dev/null
+    sudo ufw deny out 145 &>/dev/null
+    sudo ufw deny out 445 &>/dev/null
+    sudo ufw deny out 5800  &>/dev/null
+    sudo ufw deny out 5900 &>/dev/null
+    echo "blocked the following ports: 135, 137, 138, 139, 145, 445, 5800, 5900"
+    pause
     }
-### information
+
 sysinfo_menu() {
     clear
     # write_header " $title/menu/sysinfo "	
