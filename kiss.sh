@@ -1,424 +1,539 @@
 #!/bin/bash
 # Kiril's Initial Setup Script for Debian-based Linux Distributions
 # Define variables
-ver=0.041
-vername="letmein" 
-# Date
-time=$(date +"%Y-%m-%d-%X")
+ver=0.05
+vername="kisslater"
 bold=$(tput bold)
 normal=$(tput sgr0)
 LSB=/usr/bin/lsb_release
 IFS=$'\n'
-# title=./${bold}kiss${normal}_$ver
-echo 'alias kiss="bash $pwd/kiss.sh"' >> /home/$USER/.bashrc/ 
-sudo apt-get install make autoconf --no-install-recommends
+LOGFILE="/home/$(logname)/.config/kiss/kisslog"
+username=$(who | awk '{print $1}')
 menus() {
-    clear
-#	write_header " $title/menu "	
-    title
-    echo "(1) inst-prog - install programs and utilities"
-    echo "(2) ku - kiss utilities"
-    echo "(3) upgrade - check for package updates and/or kernel upgrades"
-    echo "(4) about - information about this script"
-    echo "(5) exit"
-	echo "-------------------------------------"
-    echo "Github: https://github.com/kiril-u/KISS"
-	echo "-------------------------------------"
-    }
-title() {
-	echo "-------------------------------------"
-    echo " _    _            Kiril's"
-    echo '| | _(_)___ ___    Initial'
-    echo '| |/ / / __/ __|   Setup'
-    echo '|   <| \__ \__ \   Script'
-    echo "|_|\_\_|___/___/   $ver"
-	echo "-------------------------------------"
-    }
+	clear
+	logger
+	if [ $(date +%B) = "June" ]; then
+        gaytitle
+    else
+        title
+    fi
+	echo "${bold}Program Installations${normal}"
+	echo " (1) $(tput setaf 1)E$(tput sgr0)ssentials"
+	echo " (2) $(tput setaf 2)M$(tput sgr0)edia Oriented"
+	echo " (3) $(tput setaf 3)P$(tput sgr0)roprietary"
+	echo " (4) $(tput setaf 4)N$(tput sgr0)etworking and Administration"
+	echo " (5) Snap & $(tput setaf 7)F$(tput sgr0)latpak"
+	echo "${bold}Various Scripts${normal}"
+	echo " (6) $(tput setaf 9)Y$(tput sgr0)ouTube Simple Downloader (${bold}ytsd${normal})"
+	echo " (7) M$(tput setaf 6)a$(tput sgr0)ke OPML"
+	echo ""
+	echo " (8) E$(tput setaf 8)x$(tput sgr0)it"
+	echo ""
+	echo "---------------------------------------"
+	echo "Github: https://github.com/kiril-u/kiss"
+	echo "---------------------------------------"
+	local choice
+	read -e -p "> " choice
+	case "$choice" in
+        1) essentials ;;
+        e) essentials ;;
+        E) essentials ;;
+        2) media ;;
+        m) media ;;
+        M) media ;;
+        3) proprietary ;;
+        p) proprietary ;;
+        P) proprietary ;;
+        4) netadmin ;;
+        n) netadmin ;;
+        N) netadmin ;;
+	5) snapak ;; 
+	f) snapak ;;
+	F) snapak ;;
+	6) ytsd ;;
+	Y) ytsd ;;
+	y) ytsd ;;
+	7) make_opml ;;
+	A) make_opml ;;
+	a) make_opml ;;
+        8) exit 0 ;;
+        x) exit 0 ;;
+        X) exit 0 ;;
+        exit) exit 0 ;;
+	0) about_kiss ;;
+	k) about_kiss ;;
+	K) about_kiss ;;
+    esac
+}
 
-inst-prog() {
+title() {
+	echo "---------------------------------------"
+	echo " _    _            Kiril's"
+	echo "| | _(_)___ ___    Initial"
+	echo "| |/ / / __/ __|   Setup"
+	echo "|   <| \__ \__ \   Script"
+	echo "|_|\_\_|___/___/   $(tput setaf 202)$ver$(tput sgr0)"
+	echo "---------------------------------------"
+}
+
+gaytitle() {
+    if [ $(dpkg -l | grep "toilet")=1 ]; then sudo apt-get install toilet -qq &> /dev/null;fi
+        toilet kiss --gay
+        echo "       Version: $(tput setaf 202)$ver$(tput sgr0)"
+        echo ""
+}
+
+
+debinstall() {
+	# 24/03/21 ver.
+	# recieves <package-name $1> <url $2>
+	local DATE=$(date +"%Y-%m-%d")
+	local TIME=$(date +"%T")
+	# check if package exists:
+	if [ dpkg -l $1 &> /dev/null ]; then
+		echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from $2 using $0, but it was already installed" >> $LOGFILE ; pause; return 0
+	fi
+	# checks if wget exists, and if not installs it
+	if ! dpkg -l wget &> /dev/null; then
+		sudo apt-get install -y wget
+	fi
+	# makes temporary directory
+	mkdir /home/$(logname)/.temporary-kiss/
+	cd /home/$(logname)/.temporary-kiss	
+	# downloads and installs	
+	wget -O temporary-file-do-not-touch.deb $2 &> $LOGFILE
+	sudo dpkg -i temporary-file-do-not-touch.deb &> $LOGFILE
+	cd ..
+	rm -R /home/$(logname)/.temporary-kiss/
+	# checks and informs the user and log on whether or not the installation was successful
+	if [ dpkg -l $1 &> /dev/null && echo "$1 is successfully installed, returning to the main menu" ]; then
+		echo "[$TIME $DATE] $1 was successfully installed by user $(logname) from $2 using $0" >> $LOGFILE ; pause; return 0
+	else
+		echo "Installation failed, $1 could not be installed"; echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from $2, but failed" >> $LOGFILE ; pause; return 1 	
+	fi
+}
+
+aptinstall() {
+	# 24/03/21 ver.
+	# recieves <package-name $1>
+	local DATE=$(date +"%Y-%m-%d")
+	local TIME=$(date +"%T")
+	# check if package exists:
+	if [ dpkg -l $1 &> /dev/null ]; then
+		echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from the package manager using $0, but it was already installed" >> $LOGFILE ; pause; return 0
+	else
+		sudo apt-get install -y $1 >> $LOGFILE
+	fi
+	# checks and informs the user and log on whether or not the installation was successful
+	if [ dpkg -l $1 &> /dev/null && echo "$1 is successfully installed, returning to the main menu" ]; then
+		echo "[$TIME $DATE] $1 was successfully installed by user $(logname) from the package manager using $0" >> $LOGFILE ; pause; return 0
+	else
+		echo "Installation failed, $1 could not be installed"; echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from the package manager, but failed" >> $LOGFILE ; pause; return 1 	
+	fi
+}
+
+logger() {
+    if [[ ! -f "$LOGFILE" ]]; then
+        sudo mkdir /home/$(logname)/.config/kiss/ && sudo touch $LOGFILE; echo "### kiss log" >> $LOGFILE; local DATE=$(date +"%Y-%m-%d"); local TIME=$(date +"%T"); echo "# Creation date: $DATE - $TIME" >> $LOGFILE
+    fi
+}
+
+essentials() {
     clear
-#	write_header " $title/menu/install-programs "	
     title
-    echo "${bold}Package Managers${normal}"
-        echo "- snap - enables Snap"
-        echo "- flatpak - enables Flatpak"
-    echo "${bold}Network Security${normal}"
-        echo "- f2b - Fail2ban [autoconfigured]"
-        echo "- ufw - Uncomplicated Firewall [autoconfigured]"
-        echo "  - ufw-optional - block some ports used by microsoft systems"
-    echo "${bold}Text Editors${normal}"
-        echo "- vim - text editor"
-        echo "- gedit - gnome text editor"
-        echo "- kate - Kate editor"
-    echo "${bold}Screenshooting${normal}"
-        echo "- fshot - Flameshot"
-        echo "- kspec - KDE Spectacle"
-    echo "${bold}Partition Managers and Image Burners${normal}"
-        echo "- gparted - Gnome partition editor" 
-        echo "- gdu - Gnome disk utility"
-        echo "- sdc - Startup Disk Creator"
+    echo ${bold}"$(tput setaf 1)~@~ Essentials ~@~$(tput sgr0)"${normal}
+    echo ${bold}"Text Editors"${normal}
+# -- neovim
+	if dpkg -l neovim &> /dev/null; then
+		echo "$(tput setaf 8)- neovim - a modern vim fork$(tput sgr0) (installed)"
+	else
+		echo "- $(tput setaf 2)neovim$(tput sgr0) - a modern vim fork"
+        fi		
+# -- gedit
+	if dpkg -l gedit &> /dev/null; then
+            echo "$(tput setaf 8)- gedit - Gnome text editor (with plugins)$(tput sgr0) (installed)"
+        else
+            echo "- gedit - Gnome text editor (with plugins)"
+        fi
+# -- kwrite
+	if dpkg -l kwrite &> /dev/null; then
+            echo "$(tput setaf 8)- kwrite - KDE text editor$(tput sgr0) (installed)"
+        else
+            echo "- kwrite - KDE text editor"
+        fi
+    echo "${bold}Disk & Partition Managers${normal}"
+# -- gparted        
+	if dpkg -l gparted &> /dev/null; then
+            echo "$(tput setaf 8)- gparted - GNOME Partition Editor$(tput sgr0) (installed)"
+        else
+            echo "- gparted - GNOME Partition Editor"
+        fi
+# -- gnome-disk-utility        
+	if dpkg -l gnome-disk-utility &> /dev/null; then
+		echo "$(tput setaf 8)- gdu - GNOME Disks$(tput sgr0) (installed)"
+	else
+           	 echo "- gdu - GNOME Disks"
+        fi
     echo "${bold}Browsers${normal}"
-        echo "- brave - Brave Browser"
-        echo "- opera - Opera Browser"
-        echo "- vivaldi - Vivaldi Browser"
-    echo "${bold}PDF Readers${normal}"
-        echo "- evince - Evince"
-        echo "- zathura - Zathura"
-     echo "${bold}Terminal Emulators${normal}"   
-        echo "- tx - Tilix Terminal"
-        echo "- d-ter - Deepin Terminal" 
-    echo "${bold}Other essential programs: (for me)${normal}"
-        echo "- 1pass - 1Password"
-        #echo "- dbox - Dropbox"
-        echo "- zoom - Zoom"
-        echo "- wireshark - Wireshark"
-        echo "- 4k - 4kvideodownloader 4.13.5-1"
-        echo "- mend - Mendeley Desktop"
-        echo "- times - Timeshift backup tool"
-        echo "- tlp - saving laptop battery power"
-        echo "- rhybox - Rhythmbox"
-        echo "- mpv - mpv Media Player"
-        echo "- ttf - TrueType Fonts (Microsoft)"
-        echo "- tag - Easytag ID3 tags editor"
-        echo "- signal - Signal application for desktop"
-     echo "${bold}CLI Tools and Utilities${normal}"           
-        echo "- ranger - Ranger file manager"
-        #echo "- cmus - C* Music Player"
-        #echo "- cmusfm - Scrobbler for cmus"
-        echo "- iftop - Netowrk monitoring tool"
-        echo "- newsboat - RSS feed tool"
-        echo "- mpsyt - mps-youtube (using youtube in terminal"
-    read_options
-            }
-read_options(){
+	if dpkg -l brave &> /dev/null; then
+            echo "$(tput setaf 8)- brave - Brave browser$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)brave$(tput sgr0) - Brave browser"
+        fi
+	if dpkg -l ungoogled-chromium &> /dev/null; then
+            echo "$(tput setaf 8)- ungoogled - ungoogled-chromium browser$(tput sgr0) (installed)"
+        else
+            echo "- ungoogled - ungoogled-chromium browser"
+        fi
+        if [ ! -z $(dpkg -s | grep "vivaldi-stable") ]; then
+            echo "$(tput setaf 8)- vivaldi - Vivaldi browser$(tput sgr0) (installed)"
+            else
+                echo "- vivaldi - Vivaldi browser"
+        fi
+	if dpkg -l torbrowser-launcher &> /dev/null; then
+		 echo "$(tput setaf 8)- tor - Tor browser$(tput sgr0) (installed)"
+	else
+            echo "- tor - Tor browser"		
+	fi
+# 	if dpkg -l librewolf-brpwser &> /dev/null; then
+#             echo "$(tput setaf 8)- LibreWolf browser - A fork of Firefox, focused on privacy, security and freedom$(tput sgr0) (installed)"
+#        else
+#            echo "- $(tput setaf 2)librewolf$(tput sgr0) - LibreWolf browser - A fork of Firefox, focused on privacy, security and freedom"
+#        fi
+    echo "${bold}Terminal Emulators${normal}"
+	if dpkg -l tilix &> /dev/null; then
+            echo "$(tput setaf 8)- tilix - Tilix Terminal$(tput sgr0) (installed)"
+        else
+            echo "- tilix - Tilix Terminal"
+        fi
+	if dpkg -l kitty &> /dev/null; then
+            echo "$(tput setaf 8)- kitty - a GPU based terminal emulator$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)kitty$(tput sgr0) - Kitty, a GPU based terminal emulator"
+        fi
+     echo "Other Essentials"
+	if dpkg -l timeshift &> /dev/null; then
+            echo "- $(tput setaf 8)timeshift - System restore utility$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)timeshift$(tput sgr0) - TimeShift System restore utility"
+        fi
+	if dpkg -l flameshot &> /dev/null; then
+            echo "- $(tput setaf 8)flameshot - powerful yet simple to use screenshot software$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)flameshot$(tput sgr0) - powerful yet simple to use screenshot software"
+        fi
+	if dpkg -l tlp &> /dev/null; then
+            echo "- $(tput setaf 8)tlp - Save battery power on laptops$(tput sgr0) (installed)"
+        else
+            echo "- tlp - Save battery power on laptops"
+        fi
+	echo ""
+        echo "or press the ENTER key to return to the main menu"
+        read -p "> " ch
+        inputmaestro $ch
+}
+##############################################
+media() {
+    clear
+    title
+echo ${bold}"$(tput setaf 2)~@~ Media Oriented Programs ~@~$(tput sgr0)"${normal}
+echo ${bold}"Music Players"${normal}
+	if dpkg -l strawberry &> /dev/null; then
+            echo "$(tput setaf 8)- strawberry - Strawberry Music Player$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)strawberry$(tput sgr0) - Strawberry Music Player"
+        fi
+	if dpkg -l lollypop &> /dev/null; then
+            echo "$(tput setaf 8)- lollypop - is a modern music player for GNOME$(tput sgr0) (installed)"
+        else
+            echo "- lollypop - is a modern music player for GNOME"
+        fi
+	if dpkg -l rhythmbox &> /dev/null; then
+            echo "$(tput setaf 8)- rhythmbox - is a music playing application for GNOME$(tput sgr0) (installed)"
+        else
+            echo "- rhythmbox - is a music playing application for GNOME"
+        fi
+	if dpkg -l cmus &> /dev/null; then
+            echo "$(tput setaf 8)- cmus -  is a small, fast and powerful console music player for Unix-like operating systems$(tput sgr0) (installed)"
+        else
+            echo "- cmus -  is a small, fast and powerful console music player for Unix-like operating systems"
+        fi
+	echo "   $(tput setaf 8)*comes with 'cmusfm'$(tput sgr0)"
+	echo ${bold}"RSS Feed Readers"${normal}
+	if dpkg -l liferea &> /dev/null; then
+            echo "$(tput setaf 8)- liferea - Its GUI is similar to a desktop mail/news client, with an embedded web browser$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)liferea$(tput sgr0) - Its GUI is similar to a desktop mail/news client, with an embedded web browser"
+        fi
+	if dpkg -l newsboat &> /dev/null; then
+            echo "$(tput setaf 8)- newsboat - is an RSS/Atom feed reader for the text console.$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 2)newsboat$(tput sgr0) - is an RSS/Atom feed reader for the text console."
+        fi
+	if dpkg -l gnome-feeds &> /dev/null; then
+            echo "$(tput setaf 8)- feeds - GNOME Feeds is a GTK RSS Reader for Linux$(tput sgr0) (installed)"
+        else
+            echo "- feeds - GNOME Feeds is a GTK RSS Reader for Linux"
+        fi
+	echo ${bold}"Videos"${normal}
+	if dpkg -l mpv &> /dev/null; then
+            echo "$(tput setaf 8) - mpv - a minimalist video player$(tput sgr0) (installed)"
+        else
+            echo "- mpv - a minimalist video player"
+        fi
+	if dpkg -l mpsyt &> /dev/null; then
+            echo "$(tput setaf 8) - mpsyt - terminal based YouTube player and downloader $(tput sgr0) (installed)"
+        else
+            echo "- mpsyt - terminal based YouTube player and downloader"
+        fi
+	echo ""
+	echo "or press the ENTER key to return to the main menu"
+        read -p "> " ch
+        inputmaestro $ch
+}
+proprietary() {
+	clear
+	title
+	echo ${bold}"$(tput setaf 3)~@~ Proprietary ~@~$(tput sgr0)"${normal}
+	# zoom
+	if dpkg -l zoom &> /dev/null; then
+            echo "$(tput setaf 8)- zoom - Zoom Video Communications$(tput sgr0) (installed)"
+        else
+            echo "- zoom - Zoom Video Communications"
+        fi
+	# 1password
+	if dpkg -l 1password &> /dev/null; then
+            echo "$(tput setaf 8)- 1password - 1Password Manager$(tput sgr0) (installed)"
+        else
+            echo "- 1password - 1Password Manager"
+        fi
+	# 4kvideodownloader
+	if dpkg -l 4kvideodownloader &> /dev/null; then
+            echo "$(tput setaf 8)- 4kvideo - 4K Video Downloader$(tput sgr0) (installed)"
+        else
+            echo "- 4kvideo - 4K Video Downloader"
+        fi
+# 4kstogram
+	if dpkg -l 4kstogram &> /dev/null; then
+            echo "$(tput setaf 8)- 4kstogram - 4K Stogram is an Instagram photos saving client$(tput sgr0) (installed)"
+        else
+            echo "- 4kstogram - 4K Stogram is an Instagram photos saving client"
+        fi
+# mendeley
+	if dpkg -l mendeleydesktop &> /dev/null; then
+            echo "$(tput setaf 8)- mendeley - Mendeley Reference Manager$(tput sgr0) (installed)"
+        else
+            echo "- mendeley - Mendeley Reference Manager"
+        fi
+# dropbox
+	if dpkg -l dropbox &> /dev/null; then
+            echo "$(tput setaf 8)- dropbox - Dropbox Cloud Storage$(tput sgr0) (installed)"
+        else
+            echo "- dropbox - Dropbox Cloud Storage"
+        fi
+	echo ""
+        echo "or press the ENTER key to return to the main menu"
+        read -p "> " ch
+        inputmaestro $ch
+}
+
+netadmin() {
+    echo "${bold}(1) Network Security Software${normal}"
+# -- fail2ban        
+	if dpkg -l fail2ban &> /dev/null; then
+            echo "$(tput setaf 8)- f2b - Fail2ban intrusion prevention software$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 4)f2b$(tput sgr0) - Fail2ban intrusion prevention software"
+        fi
+# -- ufw
+	if dpkg -l ufw &> /dev/null; then
+            echo "$(tput setaf 8)- ufw - Uncomplicated Firewall$(tput sgr0) (installed)"
+        else
+            echo "- $(tput setaf 4)ufw$(tput sgr0) - Uncomplicated Firewall"
+        fi
+# -- gufw
+	if dpkg -l gufw &> /dev/null; then
+            echo "$(tput setaf 8)- gufw - graphical user interface for ufw$(tput sgr0) (installed)"
+        else
+            echo "- gufw - graphical user interface for ufw"
+        fi
+# -- wireshark
+	if dpkg -l wireshark &> /dev/null; then
+            echo "$(tput setaf 8)- wireshark - Network Protocol Analyzer$(tput sgr0) (installed)"
+        else
+            echo "- wireshark - Network Protocol Analyzer"
+        fi
+	echo ""
+	echo "${bold}(2) Utilities [Legacy Options]${normal}"
+	echo " - memory - Memory Information"
+	echo " - nets - Network Statistics"
+	echo " - neti - Network Information"
+	echo " - iftop - Network Monitoring Tool"
+	echo " - ipt-h - IP Tools Help"
+	echo ""
+        echo "or press the ENTER key to return to the main menu"
+        read -p "> " ch
+        inputmaestro $ch
+}
+
+inputmaestro() {
+ 	local input="$1"
+	case "$input" in
+	vim) aptinstall vim ;;
+        neovim) aptinstall neovim ;;
+        gedit) aptinstall ;;
+	kwrite) aptinstall kwrite ;;
+        f2b) aptinstall fail2ban ;;
+	ufw) ufw ;;
+        gufw) aptinstall gufw ;;
+        ungoogled) ungoogled_chromium ;;
+        brave) brave ;;
+        vivaldi) debinstall vivaldi-stable https://downloads.vivaldi.com/stable/vivaldi-stable_3.6.2165.40-1_amd64.deb;;
+        librewolf) ;;
+        tor) tor ;;
+        tilix) aptinstall tilix ;;
+        kitty) aptinstall kitty ;;
+        gparted) aptinstall gparted ;;
+        gdu) aptinstall gnome-disk-utility ;;
+	# secret
+        ufw-optional) ufw-optional ;;
+	4kvideo) debinstall 4kvideodownloader https://dl.4kdownload.com/app/4kvideodownloader_4.15.1-1_amd64.deb ;;
+	4kstogram) debinstall 4kstogram https://dl.4kdownload.com/app/4kstogram_3.3.3-1_amd64.deb ;;
+	zoom) zoom ;;
+	timeshift) aptinstall timeshift ;;
+	cmus) cmus ;;
+	strawberry) strawberry ;;
+	lollypop) lollypop ;;
+	newsboat) aptinstall newsboat ;;
+	ranger) aptinstall ranger ;;
+	mpsyt) mpsyt ;;
+	mpv) aptinstall mpv ;;
+	mendeley) sudo apt-get install --no-install-recommends --no-install-suggests wget -q;
+	wget https://www.mendeley.com/repositories/ubuntu/stable/amd64/mendeleydesktop-latest;
+	sudo dpkg -i mendeleydesktop-latest;
+	rm mendeleydesktop-latest;
+	sudo apt --fix-broken install; 
+	pause 
+	;;
+	rhythmbox) sudo apt-get -y install --no-install-recommends rhythmbox rhythmbox-data rhythmbox-plugins rhythmbox-plugin-alternative-toolbar &> /dev/null; echo "Rhythmbox is installed." ;;
+	tlp) aptinstall tlp ;;
+	dropbox) debinstall dropbox https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb ;
+	x-terminal-emulator dropbox start -i ;;
+	flameshot) aptinstall flameshot ;;
+	memory) mem_info ;;
+	nets) net_stat ;;
+	neti) net_info ;;
+	ipt-b) banip ;;
+	ipt-u) unbanip ;;
+	ipt-c) checkip ;;
+	ipt-l) blacklist ;;
+	ipt-h) ipthelp ;;	
+	esac
+}
+
+strawberry() {
+	echo "Installation for Strawberry Music Player 0.9.1"
+	echo "Please choose your distribution:"
+	echo "1 - Debian Buster (10.x)"
+	echo "2 - Debbian Bullseye (11)"
+	echo "3 - Ubuntu/Mint"
+	echo "cancel"
+	
 	local choice
 	read -e -p "> " choice
 	case $choice in
-# -- main menu
-	inst-prog) inst-prog ;;
-	1) inst-prog ;;
-	in) inst-prog ;;
-	install-programs) inst-prog ;;
-	inst-prog) inst-prog ;;
-	ku) kiss-util ;;
-	2) kiss-util ;;
-	kiss-utilities) kiss-util ;;
-	3) upgrade ;;
-	upgrade) upgrade ;;
-	up) upgrade ;;
-	4) kissinfo ;;
-	about) kissinfo ;;
-	ab) kissinfo ;;
-	5) exit 0 ;;
-	exit) exit 0 ;;
-	ex) exit 0 ;;
-# -- install-programs
-    snap) snap_enabler ;;
-    flatapk) flatapk ;;
-    f2b) f2b ;;
-    ufw) ufw ;;
-    ufw-optional) ufw-optional ;;
-    vim) vim ;;
-    gedit) gedit ;;
-    fshot) flameshot ;;
-    flameshot) flameshot ;;
-    kspec) kde-spectacle ;;
-    gparted) gparted ;;
-    gdu) gnomedu ;;
-    sdc) usbcg ;;
-    brave) brave ;;
-    brave-fix) bravefix ;;
-    opera) opera ;;
-    operasnap) operasnap ;;
-    vivaldi) vivaldi ;;
-    1pass) onepassword ;;
-    #dbox) dropbox ;;
-    #dropbox) dropbox ;;
-    #dbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
-    #dropbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
-    zoom) zoom ;;
-    wireshark) wireshark ;;
-    4k) fourkdownloader ;;
-    mend) mendeley ;;
-    times) timeshift ;;
-    d-ter) deepin-terminal ;;
-    evince) sudo apt-get -y install evince ; return ;;
-    zathura) sudo apt-get -y install zathura ; return ;;
-    tx) tilix ;;
-    tlp) tlp ;;
-    rhybox) rhybox ;;
-    kwrite) kwrite ;;
-    newsboat) newsboat ;;
-    iftop) iftop ;;
-    ranger) ranger ;;
-    #cmus) cmus ;;
-    #cmusfm) cmusfm ;;
-    mpv) mpv ;;
-    mpsyt) mpsyt ;;
-    kate) kate ;;
-    ttf) sudo apt-get -y install ttf-mscorefonts-installer; pause ;;
-    tag) sudo apt-get -y install easytag; pause ;;
-    signal) sudo apt-get -y install signal-desktop; pause ;;
-# -- kiss-utilities
-    ipt) echo "Try: 'ipt-h'"; pause ;;
-    ipt-b) banip ;;
-    ipt-u) unbanip ;;
-    ipt-c) checkip ;;
-    ipt-l) blacklist ;;
-    ipt-h) ipthelp ;;
-    nets) net_stat ;;
-    neti) net_info ;;
-    sysinfo) sysinfo_menu ;;
-    who) user_info "who" ;;
-    last) user_info "last" ;;
-    mem) mem_info ;;
-    insk) install_kirilsprograms ;;
-# -- about
-    readme) clear; title; sed -n 1,8p READ.md; pause ;;
-    changelog) clear; title; sed -n 86,116p READ.md; pause ;;
-    back) return ;;
-    *) return ;;
+	# not tested:
+	1) sudo apt-get -y install wget; wget https://files.strawberrymusicplayer.org/strawberry_0.9.1-buster_amd64.deb; sudo dpkg -i strawberry_0.9.1-buster_amd64.deb; local PACKAGE=strawberry; if dpkg -s “$PACKAGE” &> /dev/null ; then rm strawberry_0.9.1-buster_amd64.deb && echo "Strawberry Music Player 0.9.1 was successfully installed"; else echo "Something went wrong.. removing residual files" && rm strawberry_0.9.1-buster_amd64.deb; fi; pause ;; 
+	2) sudo apt-get -y install wget; wget https://files.strawberrymusicplayer.org/strawberry_0.9.1-bullseye_amd64.deb; sudo dpkg -i strawberry_0.9.1-bullseye_amd64.deb; local PACKAGE=strawberry; if dpkg -s “$PACKAGE” &> /dev/null ; then rm strawberry_0.9.1-buster_amd64.deb && echo "Strawberry Music Player 0.9.1 was successfully installed"; else echo "Something went wrong.. removing residual files" && rm strawberry_0.9.1-bullseye_amd64.deb; fi; pause ;;
+	3) sudo add-apt-repository ppa:jonaski/strawberry; sudo apt-get update; sudo apt-get install strawberry; echo "Done"; pause ;;
+	cancel) echo "Cancelling.." && pause ;;
+esac	
+}
+
+lollypop() {
+	sudo touch /etc/apt/sources.list.d/lollypop.list
+	echo "deb http://ppa.launchpad.net/gnumdk/lollypop/ubuntu bionic main" >> /etc/apt/sources.list.d/lollypop.list
+	echo "deb-src http://ppa.launchpad.net/gnumdk/lollypop/ubuntu bionic main" >> /etc/apt/sources.list.d/lollypop.list
+	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8FAD14A04A8E87F23FB5653BDBA501177AA84500
+	sudo apt update
+	sudo apt install lollypop
+}
+
+ungoogled_chromium() {
+	echo "Please choose your distribution"; distribution=$(. /etc/os-release;echo $ID$VERSION_ID) &>/dev/null; echo "$distribution"
+	echo "1. debian10 - Debian Buster"
+	echo "2. debian11 - Debian Bullseye"
+	echo "3. ubuntu - Ubuntu/Mint"
+	read -e -p "> " dist
+	case $dist in
+		debian10) 
+			echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Buster/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+			sudo apt-get install --no-install-recommends --no-install-suggests curl gnupg
+			curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Buster/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+			sudo apt-get install ungoogled-chromium ungoogled-chromium-driver ungoogled-chromium-sandbox -yy
+			;;
+		debian11)
+			echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Sid/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+			sudo apt-get install --no-install-recommends --no-install-suggests curl gnupg
+			curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Debian_Sid/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+			sudo apt update
+			sudo apt install -y ungoogled-chromium
+			;;
+		ubuntu)
+			echo 'deb http://download.opensuse.org/repositories/home:/ungoogled_chromium/Ubuntu_Focal/ /' | sudo tee /etc/apt/sources.list.d/home-ungoogled_chromium.list > /dev/null
+			curl -s 'https://download.opensuse.org/repositories/home:/ungoogled_chromium/Ubuntu_Focal/Release.key' | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home-ungoogled_chromium.gpg > /dev/null
+			sudo apt-get update
+			sudo apt-get install -y ungoogled-chromium
+		;;	
+		exit) 
+			return 0 ;;
 	esac
-	}
-kiss-util() {
-    clear
-    #write_header " $title/menu/kiss-utilities "	
-    title
-    echo "- iftop - Network Monitoring Tool"
-    echo "- ipt - IP-tools (howto:'ipt-< >'); For help type ipt-h"
-    echo "- nets - Network statistics"
-	echo "- neti - Network routing, hosts, DNS, and interface traffic information"
-	echo "- sysinfo - System Information (Neofetch and some other stuff)"
-    echo "- insk - Install a pre-determined collection of programs"
-    read_options
-    }
-write_header(){
-    Display header message
-	local h="$@"
-	echo "-------------------------------------"
-	echo "${h}"
-	echo "-------------------------------------"
-    }
+	echo "Done."
+}
 
-kissinfo() {
-    clear
-	#write_header " $title/menu/about "
-    title
-    echo
-    echo "Kirils Initial Setup Script for Debian and Debian-based Linux Distributions version $ver"
-    echo "The script was tested on Linux Mint (19-20.1), Ubuntu (20.04-20.10), Kubuntu and Debian 10"
-    echo 
-    echo "${bold}Menu Navigation:${normal}"
-    echo "To navigate quickly in the main menu, users may type the first two letters of each section" 
-    echo "(for instance, to access the program installation section (inst-prog) you may type 'in', or '1'."
-    echo "Type 'back' anywhere to return to the main menu (or just leave it blank and press [ENTER]"
-    echo "${bold}Information:${normal}"
-    echo "changelog - Read the changelog"
-    echo "readme - read some information about this script"
-    read_options
-    }
-pause() {
-	local message="$@"
-	[ -z $message ] && message="Press [Enter] key to continue..."
-	read -p "$message" readEnterKey
-    }
-snap_enabler() {
-    # Enabling snap/snapd package manager
-    sudo rm -q /etc/apt/preferences.d/nosnap.pref
-    sudo apt-get -q update
-    sudo apt-get -y install snapd
-    sudo snap -y install snap-store
-    echo "Snap package manager is enabled. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
-    local choice
-    read -e -p "> " choice
-    case $choice in
-    y) sudo reboot ;;
-    Y) sudo reboot ;;  
-    yes) sudo reboot ;;  
-    n) pause ;;
-    N) pause ;; 
-    no) pause ;; 
-    esac
-    }
-upgrade() {
-    # update distribution
-    sudo apt -q update 
-    sudo apt -yy dist-upgrade 
-    sudo apt -yy autoremove
-    pause
-    }
-### ikp
-install_kirilsprograms() {
-    echo "List of programs included in this bundle:"
-    echo "- Fail2ban"
-    echo "- UFW"
-    echo "- Vim"
-    echo "- gedit"
-    echo "- Flameshot"    
-    echo "- Gparted"
-    echo "- Gnome disk utility"
-    echo "- Startup Disk Creator"
-    echo "- Brave Browser"
-    echo "- Evince"
-    echo "- Tilix"
-    echo "- 1Password"
-    echo "- Zoom"
-    echo "- 4kvideodownloader"
-    echo "- Mendeley Desktop"
-    echo "- Timeshift"
-    echo "- Rhythmbox"
-    echo "- TrueType Fonts"
-    echo "- Ranger"
-    echo "- iftop"
-    echo "- newsboat"    
-    local choice
-    read -e -p "Would you like to install these programs? [Y/n]" choice
-	case $choice in
-	n) echo "Aborting..."; sleep 1; return ;;
-	no) echo "Aborting..."; sleep 1; return ;;
-	N) echo "Aborting..."; sleep 1; return ;;
-	y) ikp ;;
-	yes) ikp ;;
-	Y) ikp ;;
-	esac
-	}
-ikp() {
-    onepassword 
-    4kdownloader 
-    mendeley 
-    zoom 
-    brave 
-    fshot 
-    ufw
-    ufw-optional
-    f2b
-    vim 
-    gedit
-    timeshift
-    tilix
-    gparted
-    sdc
-    rhybox
-    ranger
-    sudo apt -yy install neofetch iftop evince figlet signal-desktop --no-install-recommends
-    echo "Done." 
-    pause
-    }
-### programs
-rhybox() {
-    sudo add-apt-repository ppa:vascofalves/gnome-backports
-    sudo apt-get update
-    sudo apt-get -y install rhythmbox --no-install-recommends
-    pause
-    }
-
-kate() {
-    sudo apt-get -y git cmake
-    git clone https://invent.kde.org/utilities/kate.git
-    cd kate
-    mkdir build
-    cd build
-    cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/kde/usr \
-  -DCMAKE_PREFIX_PATH=~/kde/usr
-    make
-    make install
-    cd ~/kde/kate
-    git pull --rebase
-    pause
-    }
-
+tor() {
+	sudo apt-get install --no-install-recommends --no-install-suggests apt-transport-https curl gnupg -q
+	touch $HOME/torbrowser-launcher.list
+	sudo echo "deb http://ftp.debian.org/debian stretch-backports main contrib" >> $HOME/torbrowser-launcher.list
+	sudo cp $HOME/torbrowser-launcher.list /etc/apt/sources.list.d/
+	rm $HOME/torbrowser-launcher.list
+	sudo apt-get update
+	sudo apt-get install torbrowser-launcher
+}
 mpsyt() {
-    #echo 'export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')' >> ~/.bashrc
-    #echo 'export PATH=$PY_USER_BIN:$PATH' >> ~/.bashrc
-    sudo apt-get -y install python3-pip --no-install-recommends
-    pip3 install --user mps-youtube
-    pip3 install --user youtube-dl
-    pip3 install --user youtube-dl --upgrade
-    pip3 install --user dbus-python pygobject
-    sudo pip3 install mps-youtube --upgrade
-    pause
-    }
-cmus() {
-    # sudo add-apt-repository ppa:jmuc/cmus
-    sudo apt-get update
+# echo 'export PY_USER_BIN=$(python -c 'import site; print(site.USER_BASE + "/bin")')' >> ~/.bashrc
+	echo 'export PATH=$PY_USER_BIN:$PATH' >> ~/.bashrc
+	sudo apt-get -y install python3-pip --no-install-recommends
+	pip3 install --user mps-youtube
+	pip3 install --user youtube-dl
+	pip3 install --user youtube-dl --upgrade
+	sudo apt-get -y install  python3-setuptools-git --no-install-recommends
+	pip3 install --user dbus-python pygobject &>/dev/null
+	pip3 install --user mps-youtube --upgrade
+	echo "if you see any errors' try installing 'dbus-python'"    
+	pause
+}
+
+cmus() {    
     sudo apt-get -y install cmus --no-install-recommends
-    read -e -p "Would you like to install cmusfm (audio scrobbler for cmus)? [Y/n]" choice
+    read -e -p "Would you like to install cmusfm (scrobbler for cmus)? [Y/n]" choice
 	case $choice in
-        y) cmusfm ;;
-        Y) cmusfm ;;
-        yes) cmusfm ;;
-        n) return ;;
-        N) return ;;
-        no) return ;;
+        n) return 0 ;;
+        N) return 0 ;;
+        no) return 0 ;;
     esac
-    }
-cmusfm() {
-    read -e -p "Have you installed cmus? [Y/n]" choice
+# cmusfm
+    read -e -p "Was cmus succesfully installed on your system? [Y/n]" choice
     case $choice in
-        y) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
-        Y) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
-        yes) sudo apt-get -y install libnotify-cil-dev libnotify0.4-cil libcurl4-gnutls-dev libcurl4 git; git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; make && make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
-        n) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;; 
+        y) sudo apt-get -y install --no-install-recommends --no-install-suggests libnotify-bin libnotify-dev libcurl4-gnutls-dev libcurl4 git; mkdir $HOME/.cmusfm/ && cd $HOME/.cmusfm/;git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; sudo make && sudo make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        Y) sudo apt-get -y install --no-install-recommends --no-install-suggests libnotify-bin libnotify-dev libcurl4-gnutls-dev libcurl4 git; mkdir $HOME/.cmusfm/ && cd $HOME/.cmusfm/;git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; sudo make && sudo make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        yes) sudo apt-get -y install --no-install-recommends --no-install-suggests libnotify-bin libnotify-dev libcurl4-gnutls-dev libcurl4 git; mkdir $HOME/.cmusfm/ && cd $HOME/.cmusfm/;git clone https://github.com/Arkq/cmusfm; cd cmusfm; autoreconf --install; mkdir build && cd build; ../configure --enable-libnotify; sudo make && sudo make install; cmusfm init; echo "make sure to open cmus and type ':set status_display_program=cmusfm'"; pause ;;
+        n) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;;
         N) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;;
         no) echo "Since cmus is a dependency of cmusfm, this installation is aborting.."; pause ;;
     esac
-    }
-newsboat () {
-    # git clone git://github.com/newsboat/newsboat.git
-    #dependencies
-    sudo apt-get -y install newsboat --no-install-recommends
-    pause
-        }
-mpv() {
-    sudo apt-get -y install mpv --no-install-recommends
-    pause
-    }
-ranger() {
-    # main installation
-    sudo apt-get -y install ranger --no-install-recommends
-    echo "For configuration, check the files in ranger/config/ or copy the default config to ~/.config/ranger with ranger --copy-config"
-    pause
-    }
-tilix() {
-    # dependencies
-    sudo apt-get -y install tilix --no-install-recommends
-    pause
-    }
-tlp() {
-    echo 'deb http://ftp.debian.org/debian buster-backports main' >> /etc/apt/sources.list
-    sudo apt -y update
-    sudo apt-get -y install tlp tlp-rdw
-    pause
-    }
-timeshift() {
-    sudo apt-add-repository -y ppa:teejee2008/ppa
-    sudo apt-get update
-    sudo apt-get install timeshift
-    sudo chmod +x timeshift-latest-amd64.run
-    sh ./timeshift-latest-amd64.run
-    pause
-    }
-    
-deepin-terminal() {
-    sudo add-apt-repository ppa:noobslab/deepin-sc
-    sudo apt-get update
-    sudo apt-get -y install deepin-terminal --no-install-recommends
-    pause
-    }
-    
-kde-spectacle() {
-    sudo apt-get update -y
-    sudo apt-get install -y kde-spectacle --no-install-recommends
-    pause
-    }
-gnomedu() {
-    sudo apt-get -y install -y gnome-disk-utility gnome-disk-image-mounter gsd-disk-utility-notify --no-install-recommends
-    pause
-    }
-usbcg() {
-    sudo apt-get -y install usb-creator-gtk --no-install-recommends
-    pause
-    }
+}
+
 onepassword() {
     # Add the key for the 1Password apt repository
     sudo apt-key --keyring /usr/share/keyrings/1password.gpg adv --keyserver keyserver.ubuntu.com --recv-keys 3FEF9748469ADBE15DA7CA80AC2D62742012EA22
@@ -427,41 +542,17 @@ onepassword() {
     # Install 1Password
     sudo apt-get update && sudo apt-get install 1password --no-install-recommends
 	pause
-    }
+}
+
 zoom() {
-    # installing dependencies
-    # sudo apt-get -y install libglib2.0-0 libgstreamer-plugins-base0.10-0  libxcb-shape0 libxcb-shm0 libxcb-xfixes0 libxcb-randr0 libxcb-image0 libfontconfig1 libgl1-mesa-glx libxi6 libsm6 libxrender1 libpulse0 libxcomposite1 libxslt1.1 libsqlite3-0 libxcb-keysyms1 libxcb-xtest0
-    sudo apt-get -y update
-    wget https://zoom.us/client/latest/zoom_amd64.deb
-    sudo dpkg -i zoom_amd64.deb
-    rm zoom_amd64.deb
+sudo apt-get -y update
+wget https://zoom.us/client/latest/zoom_amd64.deb
+sudo apt install --no-install-recommends --no-install-suggests libgl1-mesa-glx libxcb-xtest0
+sudo dpkg -i zoom_amd64.deb
+rm zoom_amd64.deb
     pause
-    }
-fourkdownloader() {
-    wget https://dl.4kdownload.com/app/4kvideodownloader_4.13.5-1_amd64.deb
-    sudo dpkg -i 4kvideodownloader_4.13.5-1_amd64.deb
-    rm 4kvideodownloader_4.13.5-1_amd64.deb
-	pause
-    }
-mendeley() {
-    wget https://www.mendeley.com/repositories/ubuntu/stable/amd64/mendeleydesktop-latest
-    sudo dpkg -i mendeleydesktop-latest
-    rm mendeleydesktop-latest
-	pause
-    }
-dropbox() {
-    cd ~ && wget "https://linux.dropbox.com/packages/nautilus-dropbox-2020.03.04.tar.bz2"
-    tar xjf ./nautilus-dropbox-2020.03.04.tar.bz2
-    cd ./nautilus-dropbox-2020.03.04; ./configure; make; make install;
-	sudo "Done. However, if the installation failed, you may try to fix it by typing dbox-fix. Otherwise, press [Enter]." 
-	local choice
-    read -e -p "> " choice
-    case $choice in
-    dbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
-    dropbox-fix) wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_2020.03.04_amd64.deb; sudo dpkg -i dropbox_2020.03.04_amd64.deb; sudo rm dropbox_2020.03.04_amd64; pause ;;
-    *) pause ;;
-    esac
-    }
+}
+
 wireshark() {
     local u="$USER"
     sudo apt-get install libcap2-bin wireshark --no-install-recommends
@@ -469,100 +560,18 @@ wireshark() {
     sudo chmod 750 /usr/bin/dumpcap
     sudo setcap cap_net_raw,cap_net_admin+eip /usr/bin/dumpcap
     echo "Wireshark is installed"
-	#pause "Press [Enter] key to continue..."
 	pause
-    }
-flameshot() {
-    sudo apt-get -y install flameshot --no-install-recommends
-    pause
-    }
-vim() {
-    sudo apt-get -yy install vim vim-runtime --no-install-recommends
-	pause
-    }
-gparted () {
-    sudo apt-get -y install gparted --no-install-recommends
-	pause
-    }
-##### Browsers
-opera() {
-    sudo apt update
-    sudo apt install lsb-release ca-certificates apt-transport-https software-properties-common -y
-    wget -qO- https://deb.opera.com/archive.key | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=i386,amd64] https://deb.opera.com/opera-stable/ stable non-free"
-    sudo apt-get -y update
-    sudo apt-get -y install opera-stable
-    echo "Done. Has your installation completed successfully? [Y/n]"
-    echo "If it didn't, Opera may be installed from Snap, if you've enabled it. In that case, you may type 'operasnap'" to let the script enable snap, and then install Opera from its repository. 
-    local choice
-    read -e -p "> " choice
-    case $choice in
-    y) pause ;;
-    yes) pause ;;
-    Y) pause ;;
-    n) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
-    no) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
-    N) echo "Removing residual files"; sudo apt-get -q purge opera-stable; pause ;;
-    operasnap) operasnap ;;
-    esac
-    }
-operasnap() {
-# Enabling snap/snapd package manager
-    sudo rm -q /etc/apt/preferences.d/nosnap.pref
-    sudo apt-get -q update
-    sudo apt-get -y install snapd --no-install-recommends
-    snap -y
-    sudo snap install opera
-    sudo snap -y install snap-store
-    echo "Snap package manager is enabled, and Opera Browser has been installed. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
-    local choice
-    read -e -p "> " choice
-    case $choice in
-    y) sudo reboot ;;
-    Y) sudo reboot ;; 
-    yes) sudo reboot ;; 
-    n) pause ;;
-    N) pause ;;
-    no) pause ;;
-    esac
-    }
+}
+
 brave() {
-    sudo apt-get -y install apt-transport-https curl gnupg --no-install-recommends
-    curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | sudo apt-key --keyring /etc/apt/trusted.gpg.d/brave-browser-release.gpg add -
-    echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-    sudo apt-get -y update 
-    sudo apt-get -y install brave-browser
-    echo "Done. Has your installation completed successfully? [y/n/del]"
-    local choice
-    read -e -p "> " choice
-    case $choice in
-    y) pause ;;
-    yes) pause ;;
-    Y) pause ;;
-    n) echo "trying to fix it.."; brave-fix ;;
-    no) echo "trying to fix it.."; brave-fix ;;
-    N) echo "trying to fix it.."; brave-fix ;;
-    del) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
-    delete) echo "Removing residual files"; sudo apt-get -q purge brave-browser; sudo apt-get autoremove ;;
-    esac
+	sudo apt-get -y install apt-transport-https curl gnupg --no-install-recommends
+	curl -s https://brave-browser-apt-release.s3.brave.com/brave-core.asc | sudo apt-key --keyring /etc/apt/trusted.gpg.d/brave-browser-release.gpg add -
+	echo "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+	sudo apt-get -y update
+	sudo apt-get -y install brave-browser
 	pause
-    }
-brave-fix() {
-    sudo apt-get -q rm brave-browser libgnutls-deb0-28
-    sudo apt-get -q install librtmp1=2.4+20151223.gitfa8646d.1-1+b1 
-    brave
-    }
-vivaldi() {
-    wget -qO- https://repo.vivaldi.com/archive/linux_signing_key.pub | sudo apt-key add -
-    sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
-    sudo apt-get -y update && sudo apt-get -y install vivaldi-stable
-    ## this is the old, working installation ##
-    #echo "deb http://repo.vivaldi.com/stable/deb/ stable main" | sudo tee /etc/apt/sources.list.d/vivaldi.list > /dev/null
-    #wget -O - http://repo.vivaldi.com/stable/linux_signing_key.pub | sudo apt-key add -
-    #sudo apt update && sudo apt install vivaldi-stable -yy
-    #sudo add-apt-repository 'deb https://repo.vivaldi.com/archive/deb/ stable main'
-	pause
-    }
+}
+
 ### Network security
 f2b() {
     sudo apt-get -y install fail2ban --no-install-recommends
@@ -573,25 +582,26 @@ f2b() {
     sudo systemctl start fail2ban
     sudo fail2ban-client status
     pause
-    }
+}
+
 iftop() {
-    sudo apt-get -y install iftop  --no-install-recommends
+    sudo apt-get -y install iftop
     sudo iftop
-    }
+}
+
 net_stat () {
-	#write_header " $title/menu/nets "	
-    title
-    sudo apt-get -y install net-tools --no-install-recommends
-    sudo ss -pantu
-    echo 
+    sudo apt-get -yy install net-tools --no-install-recommends
+    sudo ss -pansu
+    echo
     echo "To export current terminal output, type 'save'. Otherwise, type 'back' or press [Enter] key to return to the main menu"
     local choice
 	read -e -p "> " choice
 	case $choice in
-	save) sudo ss -pantu > KISS-nets-${time}.txt 2>&1 && cat KISS-nets-${time}.txt; pause ;;
+	save) sudo ss -pantu > KISS-nets-${date}.txt 2>&1 && cat KISS-nets-${date}.txt; pause ;;
     back) pause ;;
 	esac
-    }
+}
+
 net_info() {
     sudo apt-get -y install net-tools --no-install-recommends
     # Purpose - Get info about host such as dns, IP, and hostname
@@ -603,10 +613,9 @@ net_info() {
 	echo "Network address (IP) :  $(hostname -i)"
 	echo "DNS name servers (DNS IP) : ${dnsips}"
 	echo
-    # Purpose - Network inferface and routing info	
+    # Purpose - Network inferface and routing info
     devices=$(netstat -i | cut -d" " -f1 | egrep -v "^Kernel|Iface|lo")
-    
-	write_header " Network information "
+	echo " ${BOLD}Network information${NORMAL} "
 	echo "Total network interfaces found : $(wc -w <<<${devices})"
 
 	echo "*** IP Addresses Information ***"
@@ -617,20 +626,23 @@ net_info() {
     write_header " Interface traffic information "
 	netstat -i
     pause
-    }
+}
+
 ### ip-tools
+
+# make changes persist VVV
+
 banip() {
-    local choice 
+    local choice
     echo "Type an ip address that you want to ban from your machine:"
     read -e -p "> " choice
     sudo iptables -A INPUT -s $choice -j DROP
-    service iptables save
     echo "$choice is now blocked from accessing your device"
     pause
     }
 unbanip() {
-    local choice 
-    echo "Type an ip address that you want to unban from your machine:" 
+    local choice
+    echo "Type an ip address that you want to unban from your machine:"
     read -e -p "> " choice
     sudo iptables -D INPUT -s $choice -j DROP
     service iptables save
@@ -646,10 +658,11 @@ checkip() {
     echo "Done"
     pause
     }
-blacklist () {
+blacklist() {
     sudo iptables -L INPUT -v -n --line-numbers | grep DROP
     pause
     }
+
 ipthelp () {
     # write_header " $title/menu/ip-tools_help "
     echo "${bold}ip-tools_help${normal}:"
@@ -658,16 +671,17 @@ ipthelp () {
     echo "- ipt-c - check the status of a certain ip address"
     echo "- ipt-l - view a list of the ip addresses that are banned from your machine"
     echo "- ipt-h - read this list again from the main menu"
-	read_options
+	inputmaestro
     }
+
 ufw() {
     sudo apt-get -y install ufw gufw --no-install-recommends
     # setup ufw rules
     echo "Adding basic rules to ufw..."
-    sudo ufw deny 22/tcp  
-    sudo ufw allow out 80/tcp  
-    sudo ufw allow out 443/tcp  
-    sudo ufw default deny incoming  
+    sudo ufw deny 22/tcp
+    sudo ufw allow out 80/tcp
+    sudo ufw allow out 443/tcp
+    sudo ufw default deny incoming
     sudo ufw default allow outgoing
     sudo ufw enable
     # Harden /etc/sysctl.conf
@@ -677,64 +691,159 @@ ufw() {
     sudo sysctl mib
     sudo sysctl net.ipv4.conf.all.rp_filter
     sudo sysctl -a --pattern 'net.ipv4.conf.(eth|wlan)0.arp'
-    }
-ufw-optional() {
-    echo "Adding an optional set of ufw rules"
-    sudo ufw deny 135 &>/dev/null
-    sudo ufw deny 137 &>/dev/null
-    sudo ufw deny 138 &>/dev/null
-    sudo ufw deny 139 &>/dev/null
-    sudo ufw deny 145 &>/dev/null
-    sudo ufw deny 445 &>/dev/null
-    sudo ufw deny 5800 &>/dev/null
-    sudo ufw deny 5900 &>/dev/null
-    sudo ufw deny 3389 &>/dev/null
-    sudo ufw deny out 3389 &>/dev/null
-    sudo ufw deny out 135 &>/dev/null
-    sudo ufw deny out 137 &>/dev/null
-    sudo ufw deny out 138 &>/dev/null
-    sudo ufw deny out 139 &>/dev/null
-    sudo ufw deny out 145 &>/dev/null
-    sudo ufw deny out 445 &>/dev/null
-    sudo ufw deny out 5800  &>/dev/null
-    sudo ufw deny out 5900 &>/dev/null
-    echo "blocked the following ports: 135, 137, 138, 139, 145, 445, 5800, 5900"
-    pause
-    }
+	badports=(22 135 137 138 139 143 145 445 2200 3389 5800 5900 6000 6001)
+	for i in "${badports[@]}"
+	do
+		sudo ufw deny in $i/tcp
+		sudo ufw deny out $i/udp
+	done
+}
 
-sysinfo_menu() {
-    clear
-    # write_header " $title/menu/sysinfo "	
-	title
-	sudo apt install neofetch -y &>/dev/null
-	neofetch
-	echo "${bold}More options:${normal}"
-	echo "- who - Who is online"
-	echo "- last - Last logged in users"
-	echo "- mem - Free and used memory info"
-	echo "- back"
-    read_options
-    }  
-user_info() {
-	local cmd="$1"
-	case "$cmd" in 
-		who) write_header " Who is online "; who -H; pause ;;
-		last) write_header " List of last logged in users "; last ; pause ;;
-	esac 
-    }
-mem_info(){
+mem_info() {
     # Display used and free memory info
 	write_header " Free and used memory "
         free -m
 	write_header " Virtual memory statistics "
         vmstat
     write_header " Top 5 memory eating process "
-        ps auxf | sort -nr -k 4 | head -5	
+        ps auxf | sort -nr -k 4 | head -5
 	pause
     }
+
+write_header() {
+    Display header message
+	local h="$@"
+	echo "-------------------------------------"
+	echo "${h}"
+	echo "-------------------------------------"
+    }
+
+pause() {
+	local message="$1"
+	[ -z $message ] && message="Press [Enter] key to continue..."
+	read -p "$message" readEnterKey
+    }
+
+snapak() {
+	clear
+	gaytitle
+	echo "Do you want to install [S]nap, [F]latpak, or [B]oth? (you may [C]ancel your last choice)"
+	read -p "> " snapak
+	read -p "Do you want to install the GNOME software store? [y/n]" gnome_store
+	case $gnome_store in
+		y) sudo apt-get install -y gnome-software ;;
+		Y) sudo apt-get install -y gnome-software ;;
+		yes) sudo apt-get install -y gnome-software ;;
+	esac
+	local boi=1
+	case $snapak in
+		S) boi=boi-1; snap_enabler ;;
+		s) boi=boi-1; snap_enabler ;;
+		snap) boi=boi-1; snap_enabler ;;
+		F) flatpak ;;
+		f) flatpak ;;
+		flatpak) flatpak ;;
+		B) boi=boi-1; flatpak; snap_enabler ;;
+		b) boi=boi-1; flatpak; snap_enabler ;;
+		both) boi=boi-1; flatpak; snap_enabler ;;
+		C) break ;;
+		c) break ;;
+		cancel) break ;;
+	esac
+	if [ boi=0 ]; then
+		read -p "Do you want to install the snapcraft software store? [y/n]" snapcraft
+	else
+		pause; break ;
+	fi
+	case $snapcraft in
+		y) sudo snap install snapcraft --classic ;;
+		Y) sudo snap install snapcraft --classic ;;
+		yes) sudo snap install snapcraft --classic ;;
+	esac
+	pause
+}
+
+snap_enabler() {
+# Enable snap/snapd packages
+sudo apt-get -q update
+sudo apt-get -y install snapd
+sudo snap -y install snap-store
+echo "Snap is enabled. You should restart your machine, or log out and in again to complete the installation. Would you like to reboot now? [Y/n]"
+local choice
+read -e -p "> " choice
+case $choice in
+y) sudo reboot ;;
+Y) sudo reboot ;;
+yes) sudo reboot ;;
+n) pause ;;
+N) pause ;;
+no) pause ;;
+esac
+}
+
+flatpak() {
+	sudo apt install flatpak
+	sudo apt install gnome-software-plugin-flatpak
+	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+}
+
+### -- << Scripts >> -- ###
+## - ytsd - ##
+ytsd() {
+	while [ true ]
+	do
+		read -p "[kiss/ytsd] URL: " input
+	case "$input" in
+		help) echo "[kiss/ytsd] This script asks for a URL of a video, downloads it and its english subtitles if they are available, and then loops indefinitely in the same manner until it recieves a command to exit." ;;
+		exit) break ;;
+		x) break ;;
+		7) break ;;
+		*) youtube-dl --write-sub --sub-lang en --add-metadata $input ;;
+	esac
+	done
+	pause
+}
+## - makeopml - ##
+make_opml() {
+	FILE=/home/$username/$username-rss-feed.opml
+	if [ -f "$FILE" ]; then
+		echo "[kiss/makeopml] file exists"; return 0;
+	else
+		makefile
+	fi
+}
+
+makefile() {
+	cd
+	touch /home/$username/$username-rss-feed.opml
+	echo "[kiss/makeopml] What is the path to your document?"
+	read -p "[kiss/makeopml] > " pathto
+	# cp -f ~/Documents/kiril-rss-feeds ~/.newsboat/urls
+	cp -f $pathto /home/$username/.newsboat/urls
+	newsboat -r -e > /home/$username/$username-rss-feed.opml
+	checkifworked
+	pause
+}
+
+checkifworked() {
+    FILE=/home/$username/$username-rss-feed.opml
+    if [ -f "$FILE" ]; then
+        echo "[kiss/makeopml] done"
+    else
+        echo "[kiss/makeopml] something did not work properly"
+    fi
+    }
+
+### -- << /Scripts >> -- ###
+about_kiss() {
+echo "${bold}Kiril's Initial Setup Script for Debian $ver${normal}"
+echo ""
+cat $(dirname "$(realpath "$0")")/READ.md
+pause
+}
+
 # execute
-while (true) do 
-    history -s "$choice"
-    menus
-    read_options
+while [ true ]
+do
+menus
 done
