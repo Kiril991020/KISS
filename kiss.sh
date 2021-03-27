@@ -22,7 +22,7 @@ menus() {
 	echo " (2) $(tput setaf 2)M$(tput sgr0)edia Oriented"
 	echo " (3) $(tput setaf 3)P$(tput sgr0)roprietary"
 	echo " (4) $(tput setaf 4)N$(tput sgr0)etworking and Administration"
-	echo " (5) Snap & $(tput setaf 7)F$(tput sgr0)latpak"
+	echo " (5) Snap & $(tput setaf 12)F$(tput sgr0)latpak"
 	echo "${bold}Various Scripts${normal}"
 	echo " (6) $(tput setaf 9)Y$(tput sgr0)ouTube Simple Downloader (${bold}ytsd${normal})"
 	echo " (7) M$(tput setaf 6)a$(tput sgr0)ke OPML"
