@@ -1,5 +1,5 @@
 #!/bin/bash
-# Kiril's Initial Setup Script for Debian-based Linux Distributions
+# Kiril's Initial Setup Script for Debian
 # Define variables
 ver=0.05
 vername="kisslater"
@@ -9,6 +9,7 @@ LSB=/usr/bin/lsb_release
 IFS=$'\n'
 LOGFILE="/home/$(logname)/.config/kiss/kisslog"
 username=$(who | awk '{print $1}')
+# test
 menus() {
 	clear
 	logger
