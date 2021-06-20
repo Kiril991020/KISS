@@ -60,3 +60,5 @@ TO DO:
 - autoconfigure ~/.bashrc/
 
 Date: 25/03/2021 01:00
+
+test
