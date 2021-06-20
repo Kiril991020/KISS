@@ -1,6 +1,7 @@
 #!/bin/bash
 # Kiril's Initial Setup Script for Debian
 # variables:
+# Define variables
 ver=0.06-beta
 vername="eclipse"
 bold=$(tput bold)
@@ -14,6 +15,11 @@ menus() {
 	clear
 	logger
     title
+# 	if [ $(date +%B) = "June" ]; then
+#         gaytitle
+#     else
+        title
+#     fi
 	echo "${bold}Program Installations${normal}"
 	echo " (1) $(tput setaf 1)E$(tput sgr0)ssentials"
 	echo " (2) $(tput setaf 2)M$(tput sgr0)edia Oriented"
@@ -78,6 +84,19 @@ title() {
 	echo "|_|\_\_|___/___/   $(tput setaf 1)$ver$(tput sgr0)"
 	echo "---------------------------------------"
 }
+
+### -< Installation Functions >- ###
+# gaytitle() {
+#     dpkg -l | grep "toilet" &> /dev/null
+#     local tony=$?
+#     if [ $tony=1 ]; then 
+#         sudo apt-get -q install toilet &> /dev/null
+#     fi
+#         toilet "kiss" --gay
+#         echo "       Version: $(tput setaf 202)$ver$(tput sgr0)"
+#         echo ""
+# }
+
 
 ### -< Installation Functions >- ###
 
