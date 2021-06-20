@@ -18,7 +18,6 @@ menus() {
 # 	if [ $(date +%B) = "June" ]; then
 #         gaytitle
 #     else
-        title
 #     fi
 	echo "${bold}Program Installations${normal}"
 	echo " (1) $(tput setaf 1)E$(tput sgr0)ssentials"
@@ -29,10 +28,15 @@ menus() {
 	echo "${bold}Various Scripts${normal}"
 	echo " (6) Simple $(tput setaf 9)V$(tput sgr0)ideo Downloader (${bold}svd${normal})"
 	echo " (7) M$(tput setaf 6)a$(tput sgr0)ke OPML"
+	echo " (8) My Dot $(tput setaf 13)F$(tput sgr0)iles"
 	echo ""
 	echo " (8) E$(tput setaf 8)x$(tput sgr0)it"
 	echo ""
-	printf "BAT: $(cat /sys/class/power_supply/BAT0/capacity)%%"
+	if test -f "/sys/class/power_supply/BAT0"; then
+        printf "BAT: $(cat /sys/class/power_supply/BAT0/capacity)%%"
+	else
+        printf "AC"
+    fi
 	printf " | RAM: $(awk '/^Mem/ {printf("%u%%", 100*$3/$2)}' <(free -m))%"
 	printf " | CPU: $(ps -A -o pcpu | tail -n+2 | paste -sd+ | bc)%%\n"
 	echo "---------------------------------------"
@@ -61,7 +65,10 @@ menus() {
         7) make_opml ;;
         A) make_opml ;;
         a) make_opml ;;
-        8) exit 0 ;;
+        8) dotfiles ;;
+        f) dotfiles ;;
+        F) dotfiles ;;
+        9) exit 0 ;;
         x) exit 0 ;;
         X) exit 0 ;;
         q) exit 0 ;;
@@ -84,19 +91,6 @@ title() {
 	echo "|_|\_\_|___/___/   $(tput setaf 1)$ver$(tput sgr0)"
 	echo "---------------------------------------"
 }
-
-### -< Installation Functions >- ###
-# gaytitle() {
-#     dpkg -l | grep "toilet" &> /dev/null
-#     local tony=$?
-#     if [ $tony=1 ]; then 
-#         sudo apt-get -q install toilet &> /dev/null
-#     fi
-#         toilet "kiss" --gay
-#         echo "       Version: $(tput setaf 202)$ver$(tput sgr0)"
-#         echo ""
-# }
-
 
 ### -< Installation Functions >- ###
 
@@ -131,21 +125,41 @@ debinstall() {
 
 aptinstall() {
 	# 24/03/21 ver.
-	# recieves <package-name $1>
+	# receives <package-name $1>
 	local DATE=$(date +"%Y-%m-%d")
 	local TIME=$(date +"%T")
 	# check if package exists:
-	if [ dpkg -l $1 &> /dev/null ]; then
+	dpkg -l $1 &> /dev/null
+	var = echo $?
+	if [ var=0 ]; then
 		echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from the package manager using $0, but it was already installed" >> $LOGFILE ; pause; return 0
 	else
 		sudo apt-get install -y $1 >> $LOGFILE
 	fi
 	# checks and informs the user and log on whether or not the installation was successful
-	if [ dpkg -l $1 &> /dev/null && echo "$1 is successfully installed, returning to the main menu" ]; then
+	if [ dpkg -l $0 &> /dev/null && echo "$1 is successfully installed, returning to the main menu" ]; then
 		echo "[$TIME $DATE] $1 was successfully installed by user $(logname) from the package manager using $0" >> $LOGFILE ; pause; return 0
 	else
 		echo "Installation failed, $1 could not be installed"; echo "[$TIME $DATE] $1 was attempted to be installed by user $(logname) from the package manager, but failed" >> $LOGFILE ; pause; return 1 	
 	fi
+}
+
+### - dot files - ###
+bashrc() {
+    local DATE=$(date +"%Y-%m-%d")
+	local TIME=$(date +"%T")
+    echo "Do you want to add me aliases to your ~/.bashrc file? [Y/n]"
+    echo "## These aliases were added by kiss.sh $ver to $(logname)'s ~/.bashrc at $TIME $DATE " >> $HOME/.bashrc
+    echo "" >> $HOME/.bashrc
+    
+    
+    
+    
+    read -p "The following action will result in your ~/.bashrc file being replaced with the one I use. A backup of yours' will be created in your home folder. Please make sure your are in the same directoryDo you accept? [Y/n]" 
+    
+    touch $HOME/.backup-sources.list
+    cp $HOME/.bashrc $HOME/.backup-bashrc
+    sudo cp -f ./.bashrc $HOME/.bashrcxd
 }
 
 ### -< /Installation Functions >- ###
@@ -494,6 +508,8 @@ inputmaestro() {
             echo "gedit installation failed"
         fi  
         ;;
+        quiterss) aptinstall quiterss ;;
+        feedreader) aptinstall feedreader ;;
         kwrite) aptinstall kwrite ;;
         f2b) aptinstall fail2ban ;;
         ufw) ufw ;;
@@ -604,9 +620,9 @@ lollypop_backports() {
 
 ungoogled_chromium() {
 	echo "Please choose your distribution"; distribution=$(. /etc/os-release;echo $ID$VERSION_ID) &>/dev/null; echo "$distribution"
-	echo "1. debian10 - Debian Buster"
-	echo "2. debian11 - Debian Bullseye"
-	echo "3. ubuntu - Ubuntu/Mint"
+	echo "debian10 - Debian Buster"
+	echo "debian11 - Debian Bullseye"
+	echo "ubuntu - Ubuntu/Mint"
 	read -e -p "> " dist
 	case $dist in
 		debian10) 
@@ -635,6 +651,13 @@ ungoogled_chromium() {
 }
 
 tor() {
+	read -p "In order for tor browser to be installed, debian's contrib and non-free repos will be added to your sources lists. A backup will be created in your home folder. Do you accept? [y\n]" choice
+	case "$choice" in
+	yes) cd; touch .backup-sources.list; sudo cp /etc/apt/sources.list /home/$(logname)/.backup-sources.list;  
+	y)
+	no) echo "returning to the main menu"
+	n) echo "returning to the main menu"
+	*) echo "Invalid response, installation is cancelled"
 	sudo apt-get install --no-install-recommends --no-install-suggests apt-transport-https curl gnupg -q
 	touch $HOME/torbrowser-launcher.list
 	sudo echo "deb http://ftp.debian.org/debian stretch-backports main contrib" >> $HOME/torbrowser-launcher.list
