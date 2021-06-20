@@ -9,7 +9,6 @@ LSB=/usr/bin/lsb_release
 IFS=$'\n'
 LOGFILE="/home/$(logname)/.config/kiss/kisslog"
 username=$(who | awk '{print $1}')
-DIST="null"
 menus() {
 	clear
 	logger
